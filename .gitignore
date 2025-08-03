@@ -1,0 +1,32 @@
+node_modules/
+**/node_modules/
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+.env
+**/.env
+
+# OS-specific files
+.DS_Store
+Thumbs.db
+
+# Build output (React)
+frontend/build/
+
+# Optional: VS Code settings
+.vscode/
+
+# Optional: coverage reports from tests
+coverage/
+
+# Optional: system files
+*.swp
+*.swo
+
+# Optional: compiled binary or temp files
+*.log
+*.bak
+*.tmp
