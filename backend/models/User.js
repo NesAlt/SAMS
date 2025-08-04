@@ -13,7 +13,7 @@ const UserSchema =new mongoose.Schema({
     lowercase: true,
     trim: true
   },
-
+  
   password:{
     type:String,
     required:true
@@ -23,11 +23,7 @@ const UserSchema =new mongoose.Schema({
     enum: ['student', 'teacher', 'admin'],
     required:true
   },
-  location:{
-    type:String,
-    default:null
-  },
-  subject:{
+  class:{
     type:String,
     default:null
   },

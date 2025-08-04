@@ -9,6 +9,6 @@
     "client": "npm --prefix frontend start"
   },
    "devDependencies": {
-    "concurrently": "^8.0.0"
+    "concurrently": "9.2.0"
   }
 }
