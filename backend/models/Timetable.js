@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 
 const TimetableSchema = new mongoose.Schema({
-  location: {
+  class: {
     type: String,
     required: true
   },
