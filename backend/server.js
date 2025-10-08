@@ -2,6 +2,7 @@ const express = require('express');
 const connectDB = require('./config/db');
 const cors =require('cors');
 const dotenv = require('dotenv');
+const User = require('./models/User');
 
 dotenv.config();
 
@@ -15,7 +16,12 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-app.use('/api/attendance', require('./routes'));
+app.get('/api/test', async (req, res) => {
+  const users = await User.find({});
+  res.json(users);
+});
+
+app.use('/api/auth', require('./routes/Auth.route'));
 
 const PORT =process.env.PORT
 connectDB().then(()=>{

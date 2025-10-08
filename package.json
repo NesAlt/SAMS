@@ -2,7 +2,7 @@
   "name": "sams",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "server.js",
  "scripts": {
     "start": "concurrently \"npm run server\" \"npm run client\"",
     "server": "npm --prefix backend run dev",
