@@ -4,6 +4,8 @@ Joi.objectId = require('joi-objectid')(Joi);
 const AttendanceSchema = Joi.object({
   studentId:Joi.objectId().required(),
 
+  teacherAssignment: Joi.objectId().required(),
+
   date:Joi.date().required(),
 
   status:Joi.string()
@@ -14,9 +16,7 @@ const AttendanceSchema = Joi.object({
 
   markedBy:Joi.objectId().required(),
   
-  approvedLeave:Joi.boolean().default(false),
-
-  semester:Joi.string().trim().required()
+  approvedLeave:Joi.boolean().default(false)
 });
 
 module.exports={AttendanceSchema};

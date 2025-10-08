@@ -6,6 +6,11 @@ const AttendanceSchema = new mongoose.Schema({
     ref: 'User',
     required: true
   },
+  teacherAssignment: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'TeacherAssignment',
+    required: true
+  },
   date: {
     type: Date,
     required: true
@@ -27,10 +32,6 @@ const AttendanceSchema = new mongoose.Schema({
   approvedLeave: {
     type: Boolean,
     default: false
-  },
-  semester: {
-    type: String,
-    required: true
   }
 }, {
   timestamps: true
