@@ -1,0 +1,131 @@
+/* Modal backdrop */
+.csv-modal-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+/* Modal box */
+.csv-modal {
+  background: #ffffff;
+  border-radius: 12px;
+  padding: 30px 25px;
+  width: 100%;
+  max-width: 420px;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.15);
+  animation: fadeIn 0.3s ease-out;
+  font-family: 'Inter', sans-serif;
+}
+
+.csv-modal-title {
+  font-size: 1.5rem;
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+/* File input styling */
+.csv-file-label {
+  display: block;
+  font-weight: 500;
+  margin-bottom: 10px;
+  cursor: pointer;
+  color: #333;
+}
+
+.csv-file-input {
+  width: 100%;
+  padding: 8px 10px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  margin-top: 6px;
+}
+
+/* Buttons */
+.csv-modal-actions {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 20px;
+}
+
+.btn {
+  padding: 10px 18px;
+  font-size: 0.95rem;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.btn-primary {
+  background-color: #800020;
+  color: white;
+}
+
+.btn-primary:hover {
+  background-color: #a8012b;
+}
+
+.btn-secondary {
+  background-color: #f0f0f0;
+  color: #333;
+}
+
+.btn-secondary:hover {
+  background-color: #e0e0e0;
+}
+
+/* Status message */
+.csv-status {
+  margin-top: 16px;
+  font-size: 0.9rem;
+  color: #555;
+  white-space: pre-line;
+}
+
+/* Fade-in animation */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+/* Hide the actual file input */
+.custom-file-upload input[type="file"] {
+  display: none;
+}
+
+/* Styled label that looks like a button */
+.upload-button {
+  display: inline-block;
+  padding: 10px 18px;
+  background-color: #800020;
+  color: white;
+  font-weight: 500;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.2s ease;
+  margin-bottom: 10px;
+}
+
+.upload-button:hover {
+  background-color: #a8012b;
+}
+
+/* Show selected file name */
+.file-name {
+  display: block;
+  margin-top: 8px;
+  font-size: 0.9rem;
+  color: #444;
+}

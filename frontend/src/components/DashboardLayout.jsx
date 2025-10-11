@@ -3,7 +3,7 @@ import PropTypes from "prop-types";
 import { useState } from "react";
 import "./DashboardLayout.css";
 
-const DashboardLayout = ({ menuItems, children }) => {
+const DashboardLayout = ({ menuItems, children, onMenuClick }) => {
   const { user, logout } = useAuth();
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [notifOpen, setNotifOpen] = useState(false);
@@ -11,21 +11,22 @@ const DashboardLayout = ({ menuItems, children }) => {
 
   return (
     <div className="dashboard-container">
-      {/* Sidebar */}
       {sidebarOpen && (
         <aside className="sidebar">
           <h2>Menu</h2>
           <ul>
             {menuItems.map((item, index) => (
-              <li key={index}>{item}</li>
+              <li key={index}
+              onClick={()=>onMenuClick && onMenuClick(item)}
+              style={{cursor:"pointer"}}
+              >
+                {item}</li>
             ))}
           </ul>
         </aside>
       )}
 
-      {/* Main Content */}
       <div className="main-content">
-        {/* Header */}
         <header className="header">
           <div>
             <button onClick={() => setSidebarOpen(!sidebarOpen)}>☰</button>
@@ -43,7 +44,6 @@ const DashboardLayout = ({ menuItems, children }) => {
               )}
             </div>
 
-            {/* User Dropdown */}
             <div className="dropdown-container">
               <button onClick={() => setUserDropdownOpen(!userDropdownOpen)}>
                 {user?.name} ({user?.role})
@@ -59,7 +59,6 @@ const DashboardLayout = ({ menuItems, children }) => {
           </div>
         </header>
 
-        {/* Page Content */}
         <div className="page-content">{children}</div>
       </div>
     </div>
@@ -69,6 +68,7 @@ const DashboardLayout = ({ menuItems, children }) => {
 DashboardLayout.propTypes = {
   menuItems: PropTypes.arrayOf(PropTypes.string).isRequired,
   children: PropTypes.node.isRequired,
+  onMenuClick:PropTypes.func,
 };
 
 export default DashboardLayout;

@@ -1,6 +1,6 @@
 import DashboardLayout from "../components/DashboardLayout";
 
-const TeacherDashboard = () => {
+const StudentDashboard = () => {
   const menuItems = [
     "View Attendance",
     "Leaves",
@@ -15,4 +15,4 @@ const TeacherDashboard = () => {
   );
 };
 
-export default TeacherDashboard;
+export default StudentDashboard;
