@@ -1,4 +1,5 @@
-import DashboardLayout from "../components/DashboardLayout";
+import DashboardLayout from "../../components/DashboardLayout";
+import AdminTeacherAssignment from "./AdminTeacherAssignment";
 import AdminUserManagement from "./AdminUserManagement";
 import { useState } from "react";
 
@@ -6,6 +7,7 @@ const AdminDashboard = () => {
   const menuItems = [
     "Dashboard Overview",
     "Manage Users",
+    "Assign Teachers",
     "Assign Timetables",
     "Generate Reports",
     "System Settings",
@@ -25,6 +27,8 @@ const AdminDashboard = () => {
 
       case "Manage Users":
         return <AdminUserManagement/>
+      case "Assign Teachers":
+        return <AdminTeacherAssignment/>
 
       // case "Assign Timetables":
       //   return <AdminTimetables/>

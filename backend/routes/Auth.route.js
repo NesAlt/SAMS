@@ -11,7 +11,7 @@ const validate = (schema) => (req, res, next) => {
   next();
 };
 
-router.post('/register', validate(registerUserSchema), register);
+// router.post('/register', validate(registerUserSchema), register);
 router.post('/login', validate(loginUserSchema), login);
 
 module.exports = router;

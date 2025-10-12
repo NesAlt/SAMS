@@ -1,0 +1,16 @@
+<svg width="64" height="64" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Clipboard background -->
+  <rect x="12" y="8" width="40" height="48" rx="4" fill="#1E1E2F" stroke="#4A90E2" stroke-width="2"/>
+
+  <!-- Top tab of clipboard -->
+  <rect x="24" y="4" width="16" height="8" rx="2" fill="#4A90E2"/>
+
+  <!-- Student head -->
+  <circle cx="32" cy="26" r="6" stroke="#E0E0E0" stroke-width="2"/>
+
+  <!-- Student shoulders -->
+  <path d="M22 40c0-4.418 4.477-8 10-8s10 3.582 10 8v2H22v-2z" stroke="#E0E0E0" stroke-width="2"/>
+
+  <!-- Checkmark -->
+  <path d="M25 48l5 5 9-9" stroke="#7ED321" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

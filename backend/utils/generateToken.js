@@ -8,7 +8,7 @@ const generateToken = (user) => {
       email: user.email
     },
     process.env.JWT_SECRET,
-    { expiresIn: '7d' } // token validity (7 days)
+    { expiresIn: '1d' } // token validity (1 day)
   );
 };
 

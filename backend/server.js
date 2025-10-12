@@ -2,7 +2,7 @@ const express = require('express');
 const connectDB = require('./config/db');
 const cors =require('cors');
 const dotenv = require('dotenv');
-const User = require('./models/User');
+const { required } = require('joi');
 
 
 dotenv.config();
@@ -19,6 +19,8 @@ app.use(express.json());
 
 app.use('/api/auth', require('./routes/Auth.route'));
 app.use('/api/adminUser',require('./routes/AdminUsers.route'));
+app.use('/api/teacherUser',require('./routes/TeacherUser.route'));
+app.use('/api/studentUser',require('./routes/StudentUser.route'));
 
 const PORT =process.env.PORT
 connectDB().then(()=>{

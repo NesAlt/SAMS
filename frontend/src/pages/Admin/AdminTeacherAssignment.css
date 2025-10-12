@@ -1,0 +1,29 @@
+.admin-teacher-assignment {
+  padding: 20px;
+}
+
+.admin-teacher-assignment h2 {
+  margin-bottom: 1rem;
+}
+
+.button-group {
+  margin-bottom: 1rem;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+th, td {
+  border: 1px solid #ddd;
+  padding: 8px;
+  text-align: left;
+}
+
+.btn_del {
+  color: red;
+  border: none;
+  background: none;
+  cursor: pointer;
+}

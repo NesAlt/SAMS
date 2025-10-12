@@ -2,6 +2,9 @@ const { Readable } = require('stream');
 const csv = require('csv-parser');
 const User = require('../models/User');
 const { registerUserSchema } = require('../dtos/user.dto');
+const TeacherAssignment = require('../models/TeacherAssignment');
+const { TeacherAssignmentSchema } = require('../dtos/teacherAssignment.dtos');
+
 
 exports.getAllUsers = async (req, res) => {
   try {
@@ -146,5 +149,81 @@ exports.deleteUser = async (req, res) => {
   }
 };
 
+exports.getAllAssignments = async (req, res) => {
+  try {
+    const assignments = await TeacherAssignment.find()
+      .populate('teacher', 'name email')
+      .sort({ createdAt: -1 });
 
-;
+    res.json(assignments);
+  } catch (err) {
+    res.status(500).json({ error: 'Server Error during Get Teachers' });
+  }
+};
+
+exports.addAssignment = async (req, res) => {
+  try {
+    const { error } = TeacherAssignmentSchema.validate(req.body);
+    if (error) return res.status(400).json({ error: error.details[0].message });
+
+    const { teacher, class: className, subject, semester } = req.body;
+
+    const teacherExists = await User.findById(teacher);
+    if (!teacherExists || teacherExists.role !== 'teacher') {
+      return res.status(400).json({ error: 'Invalid Teacher ID' });
+    }
+
+    const existing = await TeacherAssignment.findOne({
+      teacher,
+      class: className,
+      subject,
+      semester,
+    });
+
+    if (existing) {
+      return res.status(400).json({ error: 'Assignment already exists for this teacher' });
+    }
+
+    let newAssignment = await TeacherAssignment.create({
+      teacher,
+      class: className,
+      subject,
+      semester,
+    });
+
+    newAssignment = await newAssignment.populate('teacher','name email');
+
+    res.status(201).json(newAssignment);
+  } catch (err) {
+    res.status(500).json({ error: 'Server issue with adding assignment' });
+  }
+};
+
+exports.updateAssignment = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const updated = await TeacherAssignment.findByIdAndUpdate(id, req.body, {
+      new: true,
+      runValidators: true,
+    }).populate('teacher','name email');
+
+    if (!updated) return res.status(404).json({ error: 'Assignment not found' });
+
+    res.json(updated);
+  } catch (err) {
+    res.status(500).json({ error: 'Server error with updating assignment' });
+  }
+};
+
+exports.deleteAssignment = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const deleted = await TeacherAssignment.findByIdAndDelete(id);
+
+    if (!deleted) return res.status(404).json({ error: 'Assignment not found' });
+
+    res.json({ message: 'Assignment deleted successfully' });
+  } catch (err) {
+    res.status(500).json({ error: 'Server issue while deleting assignment' });
+  }
+};

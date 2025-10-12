@@ -26,6 +26,4 @@ const loginUserSchema = Joi.object({
   password:Joi.string().required()
 });
 
-
-
 module.exports={registerUserSchema,loginUserSchema};

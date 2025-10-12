@@ -14,7 +14,7 @@ const AttendanceSchema = Joi.object({
 
   reason:Joi.string().max(255).optional().allow(''),
 
-  markedBy:Joi.objectId().required(),
+  markedBy:Joi.objectId().optional(),
   
   approvedLeave:Joi.boolean().default(false)
 });

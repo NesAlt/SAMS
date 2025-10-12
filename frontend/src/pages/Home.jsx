@@ -1,7 +1,7 @@
 import { useAuth } from "../context/UseAuth";
-import AdminDashboard from "./AdminDashboard";
-import TeacherDashboard from "./TeacherDashboard";
-import StudentDashboard from "./StudentDashboard";
+import AdminDashboard from "./Admin/AdminDashboard";
+import TeacherDashboard from "./Teacher/TeacherDashboard";
+import StudentDashboard from "./Student/StudentDashboard";
 
 export default function Home() {
   const { user } = useAuth();

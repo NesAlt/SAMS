@@ -1,10 +1,11 @@
-import axios from 'axios';
+import axios from '../../utils/axiosInstance';
 import { useState, useEffect } from "react";
-import UserFormModal from '../components/UserFormModal';
-import CSVUploadModal from '../components/CSVModal';
+import UserFormModal from '../../components/UserFormModal';
+import CSVUploadModal from '../../components/CSVModal';
 import './AdminUserManagement.css';
 
 const AdminUserManagement = () => {
+
   const [users, setUsers] = useState([]);
   const [stats, setStats] = useState({ total: 0, students: 0, teachers: 0 });
 
@@ -31,7 +32,7 @@ const AdminUserManagement = () => {
 
     async function fetchUsers() {
       try {
-        const { data } = await axios.get('/api/adminUser/get-all-users');
+        const { data } = await axios.get('/adminUser/get-all-users');
         if (isMounted) {
           const { users, total, students, teachers } = data;
           setUsers(users);
@@ -53,7 +54,7 @@ const AdminUserManagement = () => {
     }
 
     try {
-      await axios.delete(`/api/adminUser/delete-user/${userId}`);
+      await axios.delete(`/adminUser/delete-user/${userId}`);
       // Remove the deleted user from the users state
       setUsers(prevUsers => prevUsers.filter(user => user._id !== userId));
     } catch (err) {
@@ -63,12 +64,12 @@ const AdminUserManagement = () => {
   };
 
   const handleCsvUpload = async (formData) => {
-  const res = await axios.post('/api/adminUser/upload-users', formData, {
+  const res = await axios.post('/adminUser/upload-users', formData, {
     headers: { 'Content-Type': 'multipart/form-data' },
     });
 
     // Refresh users
-    const { data } = await axios.get('/api/adminUser/get-all-users');
+    const { data } = await axios.get('/adminUser/get-all-users');
     setUsers(data.users);
     setStats({ total: data.total, students: data.students, teachers: data.teachers });
 
@@ -123,7 +124,7 @@ const AdminUserManagement = () => {
             if (mode === 'edit') {
 
               console.log("Updating user with ID:", selectedUser._id);
-              axios.put(`/api/adminUser/update-user/${selectedUser._id}`, formData)
+              axios.put(`/adminUser/update-user/${selectedUser._id}`, formData)
                 .then(() => {
 
                   setUsers(prev => prev.map(u => u._id === selectedUser._id ? { ...u, ...formData } : u));
@@ -131,7 +132,7 @@ const AdminUserManagement = () => {
                 }).catch(err => console.error(err));
             } else {
 
-              axios.post('/api/adminUser/add-user', formData)
+              axios.post('/adminUser/add-user', formData)
                 .then(res => {
                   setUsers(prev => [...prev, res.data]);
                   setIsModalOpen(false);
