@@ -104,7 +104,7 @@ exports.getStudentsWithAttendance = async (req, res) => {
       })
     );
 
-    console.log("Percentages:", studentsWithAttendance); // should log
+    // console.log("Percentages:", studentsWithAttendance); // should log
     res.json(studentsWithAttendance);
   } catch (err) {
     console.error("Error fetching students with attendance:", err);
