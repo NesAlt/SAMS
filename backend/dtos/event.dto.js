@@ -6,8 +6,9 @@ const EventSchema =Joi.object({
 
   description:Joi.string().trim().allow(''),
 
-  date:Joi.date().required(),
-
+date: Joi.date().min('now').required()
+  .messages({ 'date.min': 'Date cannot be in the past' }),
+  
   endDate:Joi.date().min(Joi.ref('date'))
           .message({'date.min':'endDate must be larger than or equal to date'}),
 

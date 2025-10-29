@@ -9,14 +9,14 @@ fromDate:Joi.date().required(),
 
 toDate:Joi.date()
       .min(Joi.ref('fromDate')).required()
-      .message({'fromDate.min':'toDate must be greater than fromDate'}),
+      .messages({'fromDate.min':'toDate must be greater than fromDate'}),
 
 reason:Joi.string().trim().required(),
 
 status:Joi.string()
-      .valid('pending','approved','denied').required(),
+      .valid('pending','approved','denied','duty_leave').default('pending'),
 
-reviewdBy:Joi.objectId().required(),
+reviewedBy:Joi.objectId().allow(null),
 
 appliedAt:Joi.date().default(()=> new Date())
 

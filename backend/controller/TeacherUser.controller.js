@@ -1,6 +1,7 @@
 const TeacherAssignment = require('../models/TeacherAssignment');
 const Attendance = require('../models/Attendance');
 const User = require('../models/User');
+const Leave = require("../models/Leave");
 const { AttendanceSchema } = require('../dtos/attendance.dto');
 
 exports.getAssignmentsByTeacher = async (req, res) => {
@@ -104,10 +105,66 @@ exports.getStudentsWithAttendance = async (req, res) => {
       })
     );
 
-    // console.log("Percentages:", studentsWithAttendance); // should log
+    // console.log("Percentages:", studentsWithAttendance);
     res.json(studentsWithAttendance);
   } catch (err) {
     console.error("Error fetching students with attendance:", err);
     res.status(500).json({ error: "Server error fetching students" });
+  }
+};
+
+exports.getClassLeaves = async (req, res) => {
+  try {
+    const teacherId = req.user.id;
+
+    const assignment = await TeacherAssignment.findOne({ teacher: teacherId });
+    if (!assignment) {
+      return res.status(404).json({ message: "No class assigned to this teacher." });
+    }
+
+    const students = await User.find({
+      class: assignment.class,
+      role: "student"
+    }).select("_id name email class");
+
+    const studentIds = students.map((s) => s._id);
+
+    const leaves = await Leave.find({ studentId: { $in: studentIds } })
+      .populate("studentId", "name email class")
+      .populate("reviewedBy", "name email")
+      .sort({ appliedAt: -1 });
+
+    res.status(200).json(leaves);
+  } catch (error) {
+    console.error("Error fetching class leaves:", error);
+    res.status(500).json({ message: "Failed to fetch leaves." });
+  }
+};
+
+exports.updateLeaveStatus = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { status } = req.body; // "approved", "denied", "duty_leave"
+
+    if (!["approved", "denied", "duty_leave"].includes(status)) {
+      return res.status(400).json({ message: "Invalid status value." });
+    }
+
+    const updatedLeave = await Leave.findByIdAndUpdate(
+      id,
+      { status, reviewedBy: req.user.id },
+      { new: true }
+    )
+      .populate("studentId", "name class")
+      .populate("reviewedBy", "name ");
+
+    if (!updatedLeave) {
+      return res.status(404).json({ message: "Leave not found." });
+    }
+
+    res.status(200).json(updatedLeave);
+  } catch (error) {
+    console.error("Error updating leave status:", error);
+    res.status(500).json({ message: "Failed to update leave status." });
   }
 };

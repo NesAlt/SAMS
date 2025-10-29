@@ -1,6 +1,7 @@
 import DashboardLayout from "../../components/DashboardLayout";
 import AdminTeacherAssignment from "./AdminTeacherAssignment";
 import AdminUserManagement from "./AdminUserManagement";
+import AdminEventManager from './AdminEventManager';
 import { useState } from "react";
 
 const AdminDashboard = () => {
@@ -8,7 +9,7 @@ const AdminDashboard = () => {
     "Dashboard Overview",
     "Manage Users",
     "Assign Teachers",
-    "Assign Timetables",
+    "Event Manager",
     "Generate Reports",
     "System Settings",
   ];
@@ -30,8 +31,8 @@ const AdminDashboard = () => {
       case "Assign Teachers":
         return <AdminTeacherAssignment/>
 
-      // case "Assign Timetables":
-      //   return <AdminTimetables/>
+      case "Event Manager":
+        return <AdminEventManager/>
 
       // case "Generate Reports":
       //   return <AdminGenReports/>

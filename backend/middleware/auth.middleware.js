@@ -10,7 +10,12 @@ const protect = (req, res, next) => {
     token = token.split(' ')[1];
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
     // console.log("Decoded token:", decoded);
-    req.user = decoded;
+    req.user = {
+      ...decoded,
+      id: decoded.id || decoded._id,
+      _id: decoded._id || decoded.id
+    };
+    
     next();
   } catch (error) {
     return res.status(401).json({ message: 'Token invalid or expired' });

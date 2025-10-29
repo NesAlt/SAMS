@@ -4,7 +4,8 @@ const User = require('../models/User');
 const { registerUserSchema } = require('../dtos/user.dto');
 const TeacherAssignment = require('../models/TeacherAssignment');
 const { TeacherAssignmentSchema } = require('../dtos/teacherAssignment.dtos');
-
+const Event = require('../models/Event');
+const { EventSchema } = require('../dtos/event.dto');
 
 exports.getAllUsers = async (req, res) => {
   try {
@@ -225,5 +226,62 @@ exports.deleteAssignment = async (req, res) => {
     res.json({ message: 'Assignment deleted successfully' });
   } catch (err) {
     res.status(500).json({ error: 'Server issue while deleting assignment' });
+  }
+};
+
+exports.createEvent = async (req, res) => {
+  try {
+    const adminId = req.user.id;
+
+    const { error, value } = EventSchema.validate({ ...req.body, createdBy: adminId });
+    if (error) return res.status(400).json({ error: error.details[0].message });
+
+    const event = new Event(value);
+    await event.save();
+
+    res.status(201).json({ message: "Event created successfully", event });
+  } catch (err) {
+    console.error("Error creating event:", err);
+    res.status(500).json({ error: "Server error while creating event" });
+  }
+};
+
+exports.getAllEvents = async (req, res) => {
+  try {
+    const events = await Event.find().sort({ date: 1 });
+    res.json(events);
+  } catch (err) {
+    console.error("Error fetching events:", err);
+    res.status(500).json({ error: "Server error while fetching events" });
+  }
+};
+
+exports.deleteEvent = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const deletedEvent = await Event.findByIdAndDelete(id);
+    if (!deletedEvent) {
+      return res.status(404).json({ error: "Event not found" });
+    }
+    res.json({ message: "Event deleted successfully" });
+  } catch (err) {
+    console.error("Error deleting event:", err);
+    res.status(500).json({ error: "Server error while deleting event" });
+  }
+};
+
+exports.updateEvent = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { error, value } = EventSchema.validate(req.body, { allowUnknown: true });
+    if (error) return res.status(400).json({ error: error.details[0].message });
+
+    const updatedEvent = await Event.findByIdAndUpdate(id, value, { new: true });
+    if (!updatedEvent) return res.status(404).json({ error: "Event not found" });
+
+    res.json({ message: "Event updated successfully", updatedEvent });
+  } catch (err) {
+    console.error("Error updating event:", err);
+    res.status(500).json({ error: "Server error while updating event" });
   }
 };

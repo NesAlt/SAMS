@@ -1,6 +1,7 @@
 import DashboardLayout from "../../components/DashboardLayout";
 import { useState } from "react";
-import StudentAttendance from '../Student/StudentAttendance'
+import StudentAttendance from '../Student/StudentAttendance';
+import StudentLeave from '../Student/StudentLeave';
 
 const StudentDashboard = () => {
   const menuItems = [
@@ -23,8 +24,8 @@ const StudentDashboard = () => {
       case "View Attendance":
         return <StudentAttendance/>
       
-      // case "Leave":
-      //   return <StudentLeave/>
+      case "Leaves":
+        return <StudentLeave/>
       
       default:
         return <div></div>

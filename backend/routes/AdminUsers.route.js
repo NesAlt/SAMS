@@ -18,6 +18,9 @@ router.post('/add', protect, isAdmin, adminController.addAssignment);
 router.put('/update/:id', protect, isAdmin, adminController.updateAssignment);
 router.delete('/delete/:id', protect, isAdmin, adminController.deleteAssignment); 
 
-
+router.post('/event_add',protect,isAdmin,adminController.createEvent);
+router.get('/get_events',protect,isAdmin,adminController.getAllEvents);
+router.delete('/del_event/:id',protect,isAdmin,adminController.deleteEvent);
+router.put('/update_event/:id',protect,isAdmin,adminController.updateEvent);
 
 module.exports = router;

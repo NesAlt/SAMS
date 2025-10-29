@@ -18,15 +18,24 @@ const LeaveSchema = new mongoose.Schema({
     type:String,
     required:true
   },
+  isEventLeave:{ 
+    type: Boolean, 
+    default: false 
+  },
+  eventId: {
+  type: mongoose.Schema.Types.ObjectId,
+  ref: 'Event',
+  default: null
+},
   status:{
     type: String,
-    enum: ['pending', 'approved', 'denied'],
+    enum: ['pending', 'approved', 'denied','duty_leave'],
     default: 'pending'
   },
   reviewedBy:{
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
-    required: true
+    default:null
   },
   appliedAt:{
     type: Date,

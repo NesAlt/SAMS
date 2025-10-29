@@ -1,6 +1,7 @@
 import DashboardLayout from "../../components/DashboardLayout";
-import TeacherViewClass from "../Teacher/TeacherViewClass"
-import TeacherAttendance from "../Teacher/TeacherAttendance"
+import TeacherViewClass from "../Teacher/TeacherViewClass";
+import TeacherAttendance from "../Teacher/TeacherAttendance";
+import TeacherLeave from "../Teacher/TeacherLeave";
 import { useState } from "react";
 
 const TeacherDashboard = () => {
@@ -8,7 +9,7 @@ const TeacherDashboard = () => {
     "Dashboard Overview",
     "View Class",
     "Mark Attendance",
-    "Approve/Reject Leave",
+    "Leaves",
   ];
 
   const [activeSection,setActiveSection]=useState("Dashboard Overview");
@@ -28,8 +29,8 @@ const TeacherDashboard = () => {
       case "Mark Attendance":
         return <TeacherAttendance/>
 
-      // case "Approve/Reject Leave":
-      //   return <TeacherLeave/>
+      case "Leaves":
+        return <TeacherLeave/>
 
       default:
         return <div></div>

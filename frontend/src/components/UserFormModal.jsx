@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
 import PropTypes from "prop-types";
-
 import './UserFormModal.css';
 
 const UserFormModal = ({ isOpen, onClose, onSubmit, initialData = {}, mode = 'add' }) => {

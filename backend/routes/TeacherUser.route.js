@@ -7,4 +7,7 @@ router.get('/my-assignments', protect, isTeacher, teacherController.getAssignmen
 router.post('/attendance', protect, isTeacher, teacherController.markAttendance);
 router.get('/class/:className/students', protect, isTeacher, teacherController.getStudentsWithAttendance);
 
+router.get("/leaves",protect,isTeacher,teacherController.getClassLeaves);
+router.put("/leaves_status/:id",protect,isTeacher,teacherController.updateLeaveStatus);
+
 module.exports = router;
