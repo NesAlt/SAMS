@@ -375,7 +375,6 @@ exports.getMonthlyReport = async (req, res) => {
     const startDate = new Date(year, month - 1, 1);
     const endDate = new Date(year, month, 0);
 
-    // Get attendance for all students in this class for the given month
     const attendanceRecords = await Attendance.find({
       date: { $gte: startDate, $lte: endDate },
     })
@@ -383,7 +382,6 @@ exports.getMonthlyReport = async (req, res) => {
       .populate("teacherAssignment", "subject")
       .lean();
 
-    // Filter for the selected class
     const filtered = attendanceRecords.filter(
       (r) => r.studentId?.class === className
     );
@@ -407,26 +405,22 @@ exports.getMonthlyReport = async (req, res) => {
       if (rec.status === "present") studentReports[studentName][subject].present++;
     });
 
-    // Convert grouped data into report array
+    // Convert to array (per subject)
     const report = [];
     for (const [studentName, subjects] of Object.entries(studentReports)) {
-      let totalPresent = 0, totalDays = 0;
-
       for (const [subject, data] of Object.entries(subjects)) {
-        totalPresent += data.present;
-        totalDays += data.total;
+        const percentage = Math.round((data.present / data.total) * 100);
+        report.push({
+          studentName,
+          subject,
+          presentDays: data.present,
+          totalDays: data.total,
+          percentage
+        });
       }
-
-      const percentage = Math.round((totalPresent / totalDays) * 100);
-      report.push({ studentName, totalPresent, totalDays, percentage });
     }
 
-    res.json({
-      className,
-      month: parseInt(month),
-      year: parseInt(year),
-      report,
-    });
+    res.json({ className, month: parseInt(month), year: parseInt(year), report });
   } catch (err) {
     console.error("Error generating monthly report:", err);
     res.status(500).json({ message: "Server error generating monthly report." });
@@ -436,21 +430,15 @@ exports.getMonthlyReport = async (req, res) => {
 exports.getSemesterReport = async (req, res) => {
   try {
     let { className, semester } = req.params;
-    if (!semester.startsWith("Sem")) {
-      semester = `Sem${semester}`;
-    }
+    if (!semester.startsWith("Sem")) semester = `Sem${semester}`;
 
-    // Find subjects taught in this class & semester
-    const assignments = await TeacherAssignment.find({
-      class: className,
-      semester,
-    }).select("_id subject");
+    const assignments = await TeacherAssignment.find({ class: className, semester })
+      .select("_id subject");
 
     if (!assignments.length) {
       return res.json({ message: "No subjects found for this class and semester." });
     }
 
-    // Fetch attendance for all assignments of this class & semester
     const attendanceRecords = await Attendance.find({
       teacherAssignment: { $in: assignments.map((a) => a._id) },
     })
@@ -461,16 +449,14 @@ exports.getSemesterReport = async (req, res) => {
       return res.json({ message: "No attendance data found for this semester." });
     }
 
-    // Map assignment IDs to subjects
     const subjectMap = {};
-    assignments.forEach((a) => (subjectMap[a._id] = a.subject));
+    assignments.forEach((a) => (subjectMap[a._id.toString()] = a.subject));
 
-    // Group by student → subject
     const studentReports = {};
 
     attendanceRecords.forEach((rec) => {
       const studentName = rec.studentId?.name || "Unknown";
-      const subject = subjectMap[rec.teacherAssignment] || "Unknown";
+      const subject = subjectMap[rec.teacherAssignment?.toString()] || "Unknown";
 
       if (!studentReports[studentName]) studentReports[studentName] = {};
       if (!studentReports[studentName][subject])
@@ -480,18 +466,18 @@ exports.getSemesterReport = async (req, res) => {
       if (rec.status === "present") studentReports[studentName][subject].present++;
     });
 
-    // Flatten report
     const report = [];
     for (const [studentName, subjects] of Object.entries(studentReports)) {
-      let totalPresent = 0, totalDays = 0;
-
       for (const [subject, data] of Object.entries(subjects)) {
-        totalPresent += data.present;
-        totalDays += data.total;
+        const percentage = Math.round((data.present / data.total) * 100);
+        report.push({
+          studentName,
+          subject,
+          presentDays: data.present,
+          totalDays: data.total,
+          percentage
+        });
       }
-
-      const percentage = Math.round((totalPresent / totalDays) * 100);
-      report.push({ studentName, totalPresent, totalDays, percentage });
     }
 
     res.json({ className, semester, report });

@@ -34,8 +34,12 @@ const AdminUserManagement = () => {
       try {
         const { data } = await axios.get('/adminUser/get-all-users');
         if (isMounted) {
-          const { users, total, students, teachers } = data;
-          setUsers(users);
+          const filteredUsers = data.users.filter(u => u.role !== 'admin');
+          const total = filteredUsers.length;
+          const students = filteredUsers.filter(u => u.role === 'student').length;
+          const teachers = filteredUsers.filter(u => u.role === 'teacher').length;
+
+          setUsers(filteredUsers);
           setStats({ total, students, teachers });
         }
       } catch (err) {

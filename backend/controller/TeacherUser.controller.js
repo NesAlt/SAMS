@@ -137,7 +137,6 @@ exports.getStudentsWithAttendance = async (req, res) => {
     const { className } = req.params;
     const teacherId = req.user.id;
 
-    // Find the teacher's assignment for this class
     const assignment = await TeacherAssignment.findOne({
       class: className,
       teacher: teacherId,
@@ -149,16 +148,13 @@ exports.getStudentsWithAttendance = async (req, res) => {
         .json({ message: "No teacher assignment found for this class." });
     }
 
-    // Get the students in this class
     const students = await User.find({ class: className, role: "student" });
 
-    // Find the semester of this class from the assignment
     const semester = assignment.semester;
     if (!semester) {
       return res.status(400).json({ message: "Semester not defined for this class." });
     }
 
-    // Get total working days for the semester
     const workingDays = await WorkingDays.findOne({ semester });
     if (!workingDays) {
       return res.status(400).json({
@@ -168,7 +164,6 @@ exports.getStudentsWithAttendance = async (req, res) => {
 
     const totalWorkingDays = workingDays.totalWorkingDays;
 
-    // Map each student to their attendance stats
     const studentData = await Promise.all(
       students.map(async (student) => {
         const presentCount = await Attendance.countDocuments({
@@ -182,7 +177,6 @@ exports.getStudentsWithAttendance = async (req, res) => {
           status: "approved",
         });
 
-        // Combine present + approved leaves as present
         const effectivePresent = presentCount + approvedLeaveCount;
 
         const percentage =
@@ -193,6 +187,7 @@ exports.getStudentsWithAttendance = async (req, res) => {
         return {
           _id: student._id,
           name: student.name,
+          email:student.email,
           rollNo: student.rollNo,
           attendancePercentage: Number(percentage),
           onLeave: approvedLeaveCount > 0,
