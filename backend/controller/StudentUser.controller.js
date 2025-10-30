@@ -3,54 +3,77 @@ const Attendance = require("../models/Attendance");
 const User = require("../models/User");
 const Leave =require("../models/Leave")
 const Event = require('../models/Event');
+const TeacherAssignment = require('../models/TeacherAssignment');
+const WorkingDays = require("../models/WorkingDays");
 
 exports.getMyAttendance = async (req, res) => {
   try {
-
-    // console.log("req.user:", req.user);
-    // console.log("Searching attendance for studentId:", req.user.id);
-
     const studentId = new mongoose.Types.ObjectId(req.user.id);
 
-    const attendanceRecords = await Attendance.find({ studentId });
+    const student = await User.findById(studentId).lean();
+    if (!student) {
+      return res.status(404).json({ message: "Student not found." });
+    }
+
+    const attendanceRecords = await Attendance.find({ studentId })
+      .populate({
+        path: 'teacherAssignment',
+        select: 'semester class subject'
+      })
+      .lean();
 
     if (!attendanceRecords.length) {
-      // console.log("attendanceRecords.length:", attendanceRecords.length);
       return res.json({
         requiredPercentage: 75,
         overallPercentage: 0,
+        totalWorkingDays: 0,
         status: "No Attendance Records",
         daily: [],
         monthly: [],
-        semester: [],
+        semester: null,
       });
     }
 
-    const totalClasses = attendanceRecords.length;
+    const semester = attendanceRecords[0]?.teacherAssignment?.semester;
+    if (!semester) {
+      return res.status(400).json({ message: "Semester information missing in records." });
+    }
+
+    const workingDays = await WorkingDays.findOne({ semester });
+    if (!workingDays) {
+      return res.status(404).json({
+        message: "Working days not set for this semester.",
+        overallPercentage: 0,
+      });
+    }
+
     const presentCount = attendanceRecords.filter(a => a.status === "present").length;
-    const overallPercentage = Math.round((presentCount / totalClasses) * 100);
+    const totalWorkingDays = workingDays.totalWorkingDays || 0;
+
+    const overallPercentage = totalWorkingDays > 0
+      ? Math.round((presentCount / totalWorkingDays) * 100)
+      : 0;
+
     const requiredPercentage = 75;
     const status = overallPercentage >= requiredPercentage ? "Above Required" : "Behind";
-    const student = await User.findById(studentId);
 
     const daily = attendanceRecords.map(a => ({
       date: a.date,
-      class: student.class || "N/A",
+      class: a.teacherAssignment.class,
+      subject: a.teacherAssignment.subject,
       status: a.status,
     }));
 
     const monthlyMap = {};
     attendanceRecords.forEach(a => {
-      const monthKey = `${a.date.getMonth() + 1}-${a.date.getFullYear()}`;
-      if (!monthlyMap[monthKey]) {
-        monthlyMap[monthKey] = { total: 0, present: 0 };
-      }
-      monthlyMap[monthKey].total++;
-      if (a.status === "present") monthlyMap[monthKey].present++;
+      const key = `${a.date.getMonth() + 1}-${a.date.getFullYear()}`;
+      if (!monthlyMap[key]) monthlyMap[key] = { total: 0, present: 0 };
+      monthlyMap[key].total++;
+      if (a.status === "present") monthlyMap[key].present++;
     });
 
-    const monthly = Object.entries(monthlyMap).map(([monthKey, stats]) => {
-      const [month, year] = monthKey.split("-");
+    const monthly = Object.entries(monthlyMap).map(([key, stats]) => {
+      const [month, year] = key.split("-");
       return {
         month: parseInt(month),
         year: parseInt(year),
@@ -60,26 +83,10 @@ exports.getMyAttendance = async (req, res) => {
       };
     });
 
-    const semesterMap = {};
-    attendanceRecords.forEach(a => {
-      const sem = a.semester || "Unknown";
-      if (!semesterMap[sem]) {
-        semesterMap[sem] = { total: 0, present: 0 };
-      }
-      semesterMap[sem].total++;
-      if (a.status === "present") semesterMap[sem].present++;
-    });
-
-    const semester = Object.entries(semesterMap).map(([sem, stats]) => ({
-      semester: sem,
-      totalClasses: stats.total,
-      present: stats.present,
-      percentage: Math.round((stats.present / stats.total) * 100),
-    }));
-
     res.json({
       requiredPercentage,
       overallPercentage,
+      totalWorkingDays,
       status,
       daily,
       monthly,
@@ -88,7 +95,7 @@ exports.getMyAttendance = async (req, res) => {
 
   } catch (err) {
     console.error("Error fetching student attendance:", err);
-    res.status(500).json({ error: "Server error while fetching attendance" });
+    res.status(500).json({ error:err.message || "Server error while fetching attendance" });
   }
 };
 

@@ -23,4 +23,12 @@ router.get('/get_events',protect,isAdmin,adminController.getAllEvents);
 router.delete('/del_event/:id',protect,isAdmin,adminController.deleteEvent);
 router.put('/update_event/:id',protect,isAdmin,adminController.updateEvent);
 
+router.post('/working_days',protect,isAdmin,adminController.setWorkingDays);
+router.get('/fetch_working_days',protect,isAdmin,adminController.getWorkingDays);
+router.put('/update_working_days/:semester',protect,isAdmin,adminController.updateWorkingDays);
+
+router.get("/classes", protect,isAdmin, adminController.getAllClasses);
+router.get("/reports/monthly/:className/:month/:year", protect,isAdmin, adminController.getMonthlyReport);
+router.get("/reports/semester/:className/:semester", protect,isAdmin, adminController.getSemesterReport);
+
 module.exports = router;

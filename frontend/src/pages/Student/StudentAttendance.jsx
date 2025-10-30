@@ -36,7 +36,11 @@ const StudentAttendance = () => {
           <h4>Required Minimum</h4>
           <p>{attendance.requiredPercentage}%</p>
         </div>
-        <div className={`card ${attendance.status === "Above Required" ? "good" : "bad"}`}>
+        <div
+          className={`card ${
+            attendance.status === "Above Required" ? "good" : "bad"
+          }`}
+        >
           <h4>Status</h4>
           <p>{attendance.status}</p>
         </div>
@@ -99,14 +103,15 @@ const StudentAttendance = () => {
           </tr>
         </thead>
         <tbody>
-          {attendance.semester.map((s, index) => (
-            <tr key={index}>
-              <td>{s.semester}</td>
-              <td>{s.present}</td>
-              <td>{s.totalClasses}</td>
-              <td>{s.percentage}%</td>
-            </tr>
-          ))}
+          {/* ✅ FIXED SECTION BELOW */}
+          <tr>
+            <td>{attendance.semester || "N/A"}</td>
+            <td>
+              {attendance.daily.filter((d) => d.status === "present").length}
+            </td>
+            <td>{attendance.totalWorkingDays}</td>
+            <td>{attendance.overallPercentage}%</td>
+          </tr>
         </tbody>
       </table>
     </div>

@@ -3,6 +3,7 @@ const Attendance = require('../models/Attendance');
 const User = require('../models/User');
 const Leave = require("../models/Leave");
 const { AttendanceSchema } = require('../dtos/attendance.dto');
+const WorkingDays = require("../models/WorkingDays");
 
 exports.getAssignmentsByTeacher = async (req, res) => {
   try {
@@ -34,82 +35,180 @@ exports.getAssignmentsByTeacher = async (req, res) => {
 exports.markAttendance = async (req, res) => {
   try {
     const teacherId = req.user.id;
-
     const { error, value } = AttendanceSchema.validate(req.body);
     if (error) return res.status(400).json({ error: error.details[0].message });
 
     const { studentId, teacherAssignment, date, status, reason } = value;
 
     const student = await User.findById(studentId);
-    if (!student || student.role !== 'student') {
-      return res.status(404).json({ error: 'Student not found' });
+    if (!student || student.role !== "student") {
+      return res.status(404).json({ error: "Student not found" });
     }
 
     const assignment = await TeacherAssignment.findById(teacherAssignment);
     if (!assignment) {
-      return res.status(404).json({ error: 'Teacher assignment not found' });
+      return res.status(404).json({ error: "Teacher assignment not found" });
     }
 
+    const formattedDate = new Date(date);
+
+    // Check if record already exists
     let attendanceRecord = await Attendance.findOne({
-      studentId:studentId,
-      teacherAssignment:teacherAssignment,
-      date: new Date(date)
+      studentId,
+      teacherAssignment,
+      date: formattedDate,
     });
 
     if (!attendanceRecord) {
       attendanceRecord = new Attendance({
         studentId,
         teacherAssignment,
-        date,
+        date: formattedDate,
         status,
-        reason: reason || '',
-        markedBy: teacherId
+        reason: reason || "",
+        markedBy: teacherId,
       });
     } else {
-
       attendanceRecord.status = status;
-      attendanceRecord.reason = reason || '';
+      attendanceRecord.reason = reason || "";
       attendanceRecord.markedBy = teacherId;
     }
 
     await attendanceRecord.save();
 
-    res.json({ message: 'Attendance marked successfully', attendanceRecord });
-
+    res.json({ message: "Attendance marked successfully", attendanceRecord });
   } catch (err) {
-    console.error('Error marking attendance:', err);
-    res.status(500).json({ error: 'Server error while marking attendance' });
+    console.error("Error marking attendance:", err);
+    res.status(500).json({ error: "Server error while marking attendance" });
   }
 };
+
+exports.markBulkAttendance = async (req, res) => {
+  try {
+    const teacherId = req.user.id;
+    const { teacherAssignment, date, students } = req.body;
+
+    if (!teacherAssignment || !date || !students?.length) {
+      return res.status(400).json({ error: "Missing required fields" });
+    }
+
+    const assignment = await TeacherAssignment.findById(teacherAssignment);
+    if (!assignment) {
+      return res.status(404).json({ error: "Teacher assignment not found" });
+    }
+
+    const formattedDate = new Date(date);
+
+    // Save attendance for each student
+    await Promise.all(
+      students.map(async (s) => {
+        let record = await Attendance.findOne({
+          studentId: s.studentId,
+          teacherAssignment,
+          date: formattedDate,
+        });
+
+        if (record) {
+          record.status = s.status;
+          record.markedBy = teacherId;
+          await record.save();
+        } else {
+          await Attendance.create({
+            studentId: s.studentId,
+            teacherAssignment,
+            date: formattedDate,
+            status: s.status,
+            markedBy: teacherId,
+          });
+        }
+      })
+    );
+
+    res.json({ message: "Bulk attendance saved successfully" });
+  } catch (err) {
+    console.error("Error marking bulk attendance:", err);
+    res.status(500).json({ error: "Server error while marking bulk attendance" });
+  }
+};
+
 
 exports.getStudentsWithAttendance = async (req, res) => {
   try {
     const { className } = req.params;
+    const teacherId = req.user.id;
 
-    const students = await User.find({ class: className, role: "student" }).lean();
+    // Find the teacher's assignment for this class
+    const assignment = await TeacherAssignment.findOne({
+      class: className,
+      teacher: teacherId,
+    });
 
-    const studentsWithAttendance = await Promise.all(
+    if (!assignment) {
+      return res
+        .status(404)
+        .json({ message: "No teacher assignment found for this class." });
+    }
+
+    // Get the students in this class
+    const students = await User.find({ class: className, role: "student" });
+
+    // Find the semester of this class from the assignment
+    const semester = assignment.semester;
+    if (!semester) {
+      return res.status(400).json({ message: "Semester not defined for this class." });
+    }
+
+    // Get total working days for the semester
+    const workingDays = await WorkingDays.findOne({ semester });
+    if (!workingDays) {
+      return res.status(400).json({
+        message: `Working days not set for semester ${semester}.`,
+      });
+    }
+
+    const totalWorkingDays = workingDays.totalWorkingDays;
+
+    // Map each student to their attendance stats
+    const studentData = await Promise.all(
       students.map(async (student) => {
-        const total = await Attendance.countDocuments({ studentId: student._id });
-        const present = await Attendance.countDocuments({
+        const presentCount = await Attendance.countDocuments({
           studentId: student._id,
+          teacherAssignment: assignment._id,
           status: "present",
         });
 
-        const attendancePercentage = total > 0 ? Math.round((present / total) * 100) : null;
+        const approvedLeaveCount = await Leave.countDocuments({
+          studentId: student._id,
+          status: "approved",
+        });
+
+        // Combine present + approved leaves as present
+        const effectivePresent = presentCount + approvedLeaveCount;
+
+        const percentage =
+          totalWorkingDays > 0
+            ? Math.round((effectivePresent / totalWorkingDays) * 100)
+            : 0;
 
         return {
-          ...student,
-          attendancePercentage,
+          _id: student._id,
+          name: student.name,
+          rollNo: student.rollNo,
+          attendancePercentage: Number(percentage),
+          onLeave: approvedLeaveCount > 0,
         };
       })
     );
 
-    // console.log("Percentages:", studentsWithAttendance);
-    res.json(studentsWithAttendance);
+    res.json({
+      className,
+      semester,
+      totalWorkingDays,
+      students: studentData,
+    });
   } catch (err) {
     console.error("Error fetching students with attendance:", err);
-    res.status(500).json({ error: "Server error fetching students" });
+    res.status(500).json({ message: "Server error" });
   }
 };
 

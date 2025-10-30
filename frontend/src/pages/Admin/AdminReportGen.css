@@ -1,0 +1,171 @@
+/* Admin Reports Container */
+.admin-reports {
+  padding: 24px;
+  background-color: #f5f6fa;
+  min-height: 100%;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* Page Heading */
+.admin-reports h2 {
+  font-size: 1.8rem;
+  margin-bottom: 20px;
+  color: #2f3640;
+}
+
+/* Class Selection */
+.class-selection {
+  margin-bottom: 24px;
+}
+
+.class-selection h3 {
+  font-size: 1.2rem;
+  margin-bottom: 10px;
+  color: #2f3640;
+}
+
+.class-selection ul {
+  list-style: none;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.class-selection li button {
+  padding: 8px 16px;
+  border: 1px solid #800020;
+  background-color: #fff;
+  color: #800020;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-weight: 500;
+}
+
+.class-selection li button:hover {
+  background-color: #800020;
+  color: #fff;
+}
+
+.class-selection li button.active {
+  background-color: #800020;
+  color: #fff;
+  border-color: #800020;
+}
+
+/* Report Options */
+.report-options {
+  margin-bottom: 24px;
+}
+
+.report-options h3 {
+  font-size: 1.2rem;
+  margin-bottom: 12px;
+}
+
+.report-options select,
+.report-options input {
+  padding: 8px 12px;
+  margin-right: 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+.report-options input[type="number"] {
+  width: 120px;
+}
+
+.report-options button {
+  padding: 8px 16px;
+  background-color: #800020;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: background-color 0.2s ease;
+}
+
+.report-options button:hover {
+  background-color: #c00030;
+}
+
+.report-options button:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+}
+
+/* Report Table */
+.report-table {
+  margin-top: 20px;
+  overflow-x: auto;
+}
+
+.report-table h3 {
+  font-size: 1.2rem;
+  margin-bottom: 12px;
+}
+
+.report-table table {
+  width: 100%;
+  border-collapse: collapse;
+  background-color: #fff;
+  border: 1px solid #ddd;
+}
+
+.report-table th,
+.report-table td {
+  padding: 12px 10px;
+  border: 1px solid #ddd;
+  text-align: left;
+}
+
+.report-table th {
+  background-color: #800020;
+  color: #fff;
+}
+
+.report-table tr:nth-child(even) {
+  background-color: #f2f2f2;
+}
+
+.download-btn {
+  margin-top: 12px;
+  padding: 8px 16px;
+  background-color: #22a6b3;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: background-color 0.2s ease;
+}
+
+.download-btn:hover {
+  background-color: #1e90a0;
+}
+
+/* No Data Message */
+.no-data {
+  margin-top: 20px;
+  font-style: italic;
+  color: #555;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .class-selection ul {
+    flex-direction: column;
+  }
+
+  .report-options input[type="number"] {
+    width: 100%;
+    margin-bottom: 8px;
+  }
+
+  .report-options select {
+    width: 100%;
+    margin-bottom: 8px;
+  }
+}
