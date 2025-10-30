@@ -93,7 +93,7 @@ const downloadPDF = () => {
           <div className="student-list-header">
             <h3>Students in {selectedClass}</h3>
             <button className="download-btn" onClick={downloadPDF}>
-              📄 Download Report
+              Download Report
             </button>
           </div>
 

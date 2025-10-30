@@ -16,7 +16,7 @@ const UserFormModal = ({ isOpen, onClose, onSubmit, initialData = {}, mode = 'ad
       setFormData({
         name: initialData.name || '',
         email: initialData.email || '',
-        password: '', // Blank out password when editing
+        password: '',
         role: initialData.role || 'student',
         class: initialData.class || '',
       });

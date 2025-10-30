@@ -14,7 +14,6 @@ const StudentLeaveModal = ({ isOpen, onClose, onSubmit, initialData, mode }) => 
 
   const [events, setEvents] = useState([]);
 
-  // 🟢 Reset form when modal closes
   useEffect(() => {
     if (!isOpen) {
       setFormData({
@@ -27,7 +26,6 @@ const StudentLeaveModal = ({ isOpen, onClose, onSubmit, initialData, mode }) => 
     }
   }, [isOpen]);
 
-  // 🟢 Prefill data if editing an existing leave
   useEffect(() => {
     if (initialData && isOpen) {
       setFormData({
@@ -40,7 +38,6 @@ const StudentLeaveModal = ({ isOpen, onClose, onSubmit, initialData, mode }) => 
     }
   }, [initialData, isOpen]);
 
-  // 🟢 Fetch events only when modal is opened
   useEffect(() => {
     const fetchEvents = async () => {
       try {
@@ -53,7 +50,6 @@ const StudentLeaveModal = ({ isOpen, onClose, onSubmit, initialData, mode }) => 
     if (isOpen) fetchEvents();
   }, [isOpen]);
 
-  // 🟢 Handle inputs
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
     if (name === "fromDate" && formData.toDate && value > formData.toDate) {
@@ -70,7 +66,6 @@ const StudentLeaveModal = ({ isOpen, onClose, onSubmit, initialData, mode }) => 
     }
   };
 
-  // 🟢 When event is selected, auto-fill fields
   const handleEventSelect = (eventId) => {
     const selected = events.find((ev) => ev._id === eventId);
     if (selected) {
@@ -87,7 +82,6 @@ const StudentLeaveModal = ({ isOpen, onClose, onSubmit, initialData, mode }) => 
     }
   };
 
-  // 🟢 Submit leave
   const handleSubmit = (e) => {
     e.preventDefault();
     const payload = {
@@ -100,7 +94,6 @@ const StudentLeaveModal = ({ isOpen, onClose, onSubmit, initialData, mode }) => 
 
     onSubmit(payload);
 
-    // ✅ Clear form immediately after submission
     setFormData({
       fromDate: "",
       toDate: "",
@@ -195,7 +188,6 @@ const StudentLeaveModal = ({ isOpen, onClose, onSubmit, initialData, mode }) => 
               type="button"
               className="btn_cancel"
               onClick={() => {
-                // ✅ Reset before closing
                 setFormData({
                   fromDate: "",
                   toDate: "",

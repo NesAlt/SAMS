@@ -33,13 +33,11 @@ const DashboardLayout = ({ menuItems, children, onMenuClick }) => {
           </div>
 
           <div className="header-actions">
-            {/* Notifications */}
             <div className="dropdown-container">
               <button onClick={() => setNotifOpen(!notifOpen)}>🔔</button>
               {notifOpen && (
                 <div className="dropdown-content">
                   <p>No notifications</p>
-                  {/* Replace with dynamic notifications later */}
                 </div>
               )}
             </div>

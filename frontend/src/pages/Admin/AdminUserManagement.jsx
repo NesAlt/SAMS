@@ -55,7 +55,7 @@ const AdminUserManagement = () => {
 
     try {
       await axios.delete(`/adminUser/delete-user/${userId}`);
-      // Remove the deleted user from the users state
+
       setUsers(prevUsers => prevUsers.filter(user => user._id !== userId));
     } catch (err) {
       console.error('Failed to delete user:', err.response?.data?.error || err.message);
@@ -68,7 +68,6 @@ const AdminUserManagement = () => {
     headers: { 'Content-Type': 'multipart/form-data' },
     });
 
-    // Refresh users
     const { data } = await axios.get('/adminUser/get-all-users');
     setUsers(data.users);
     setStats({ total: data.total, students: data.students, teachers: data.teachers });

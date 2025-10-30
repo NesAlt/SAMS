@@ -73,7 +73,6 @@ const MarkAttendance = () => {
     <div className="mark-attendance">
       <h2>Mark Attendance</h2>
 
-      {/* Class selection row */}
       <div className="assignment-list">
         {assignments.map((a) => (
           <div
@@ -91,7 +90,7 @@ const MarkAttendance = () => {
 
       {selectedClass && (
         <div className="attendance-section">
-          {/* Date selector */}
+
           <div className="attendance-header">
             <h3>Class: {selectedClass}</h3>
             <label>
@@ -104,7 +103,6 @@ const MarkAttendance = () => {
             </label>
           </div>
 
-          {/* Student selection grid */}
           <div className="student-grid">
             {students.map((s) => (
               <div

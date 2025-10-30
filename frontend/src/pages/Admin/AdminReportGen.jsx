@@ -87,7 +87,7 @@ const AdminReports = () => {
 
   return (
     <div className="admin-reports">
-      <h2>📊 Admin Attendance Reports</h2>
+      <h2>Admin Attendance Reports</h2>
 
       <div className="class-selection">
         <h3>Select a Class</h3>
@@ -182,7 +182,7 @@ const AdminReports = () => {
             </tbody>
           </table>
           <button className="download-btn" onClick={downloadPDF}>
-            📄 Download PDF
+            Download PDF
           </button>
         </div>
       )}

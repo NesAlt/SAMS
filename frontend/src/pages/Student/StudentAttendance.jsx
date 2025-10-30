@@ -103,7 +103,6 @@ const StudentAttendance = () => {
           </tr>
         </thead>
         <tbody>
-          {/* ✅ FIXED SECTION BELOW */}
           <tr>
             <td>{attendance.semester || "N/A"}</td>
             <td>

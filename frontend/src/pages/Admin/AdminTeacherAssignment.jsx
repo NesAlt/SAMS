@@ -53,7 +53,6 @@ const AdminTeacherAssignment = ()=>{
     setIsModalOpen(true);
   };
 
-  // Delete Assignment
   const deleteAssignment = async (id) => {
     if (!window.confirm('Are you sure you want to delete this assignment?')) return;
     try {
