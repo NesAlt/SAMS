@@ -41,7 +41,12 @@ const UserFormModal = ({ isOpen, onClose, onSubmit, initialData = {}, mode = 'ad
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    onSubmit(formData);
+    const { name, email, password, role, class: className } = formData;
+    const payload = { name, email, password, role };
+
+    if (role === 'student') payload.class = className;
+
+    onSubmit(payload);
   };
 
   if (!isOpen) return null;

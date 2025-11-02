@@ -1,110 +1,212 @@
-.mark-attendance {
-  padding: 2rem;
-  font-family: "Inter", sans-serif;
-  color: #333;
+/* TeacherAttendance.css
+   Put this in the same path as your import:
+   import "./TeacherAttendance.css";
+*/
+
+/* --- Container / Typography --- */
+.mark-attendance-container {
+  max-width: 1100px;
+  margin: 24px auto;
+  padding: 28px;
+  font-family: "Inter", "Segoe UI", system-ui, -apple-system, "Helvetica Neue", Arial;
+  color: #0f172a;
+  background: #ffffff;
 }
 
-.assignment-list {
+.mark-attendance-container h2 {
+  font-size: 1.6rem;
+  text-align: center;
+  font-weight: 700;
+  color: #0f4c81;
+  margin-bottom: 16px;
+}
+
+/* --- Semester selector --- */
+.semester-select {
   display: flex;
-  gap: 1rem;
-  flex-wrap: wrap;
-  margin-bottom: 1.5rem;
-}
-
-.assignment-card {
-  background: #f4f6f8;
-  border: 2px solid transparent;
-  border-radius: 12px;
-  padding: 1rem 1.5rem;
-  cursor: pointer;
-  width: 180px;
-  transition: all 0.25s ease;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-}
-
-.assignment-card:hover {
-  border-color: #16a085;
-  transform: translateY(-3px);
-}
-
-.assignment-card.selected {
-  background: #eafaf1;
-  border-color: #16a085;
-}
-
-.attendance-section {
-  margin-top: 2rem;
-}
-
-.attendance-header {
-  display: flex;
-  justify-content: space-between;
+  justify-content: center;
+  gap: 12px;
+  margin-bottom: 18px;
   align-items: center;
-  margin-bottom: 1.5rem;
 }
 
+.semester-select label {
+  font-weight: 600;
+  color: #334155;
+}
+
+.semester-select select {
+  padding: 8px 12px;
+  border-radius: 8px;
+  border: 1px solid #e6edf3;
+  background: #fff;
+  font-size: 0.95rem;
+  outline: none;
+}
+.semester-select select:focus { border-color: #3b82f6; box-shadow: 0 4px 12px rgba(59,130,246,0.08); }
+
+/* --- Upcoming classes grid --- */
+.upcoming-classes {
+  margin-top: 6px;
+}
+
+.upcoming-classes h3 {
+  margin: 6px 0 12px 0;
+  font-size: 1.05rem;
+  color: #1f2937;
+}
+
+.class-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 12px;
+}
+
+.class-card {
+  background: #f8fafc;
+  border: 1px solid #e6eef8;
+  padding: 12px;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: transform .14s ease, box-shadow .14s ease, border-color .14s ease;
+  box-shadow: 0 1px 3px rgba(15,23,42,0.03);
+}
+.class-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 20px rgba(15,23,42,0.06);
+}
+
+.class-card.active,
+.class-card.selected {
+  background: #eff8ff;
+  border-color: #3b82f6;
+}
+.class-card.marked {
+  background-color: #e6f9e8;
+  border: 1px solid #52b788;
+  position: relative;
+  cursor: not-allowed;
+  opacity: 0.85;
+}
+
+.marked-indicator {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 6px;
+  color: #2d6a4f;
+  font-weight: 500;
+}
+
+.class-card.marked:hover {
+  transform: none;
+}
+
+.class-card.marked h4,
+.class-card.marked p {
+  color: #2d6a4f;
+}
+
+
+.class-card h4 { margin: 0 0 6px 0; color: #0f4c81; font-weight: 700; font-size: 1rem; }
+.class-card p { margin: 0; font-size: 0. nine rem; color: #475569; }
+
+/* --- Attendance panel --- */
+.attendance-section {
+  margin-top: 20px;
+  padding: 18px;
+  border-radius: 12px;
+  border: 1px solid #eef2f7;
+  background: #fff;
+  box-shadow: 0 2px 8px rgba(2,6,23,0.03);
+}
+.attendance-section h3 {
+  margin: 0 0 12px 0;
+  color: #0b4f8a;
+  font-size: 1.15rem;
+  font-weight: 700;
+}
+
+/* --- Controls --- */
+.control-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 14px;
+  align-items: center;
+}
+
+.btn {
+  padding: 8px 12px;
+  border-radius: 8px;
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+}
+.btn-present { background: #10b981; color: white; }
+.btn-present:hover { background: #059669; }
+.btn-absent  { background: #ef4444; color: white; }
+.btn-absent:hover { background: #dc2626; }
+
+.copy-control {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.95rem;
+  color: #374151;
+}
+
+.category-select {
+  padding: 8px 10px;
+  border-radius: 8px;
+  border: 1px solid #e6eef8;
+  background: #fbfdff;
+}
+
+/* --- Student grid --- */
 .student-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
-  gap: 1rem;
-  margin-bottom: 2rem;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 10px;
 }
 
 .student-card {
-  background: #f7f9fa;
+  padding: 12px;
   border-radius: 10px;
-  padding: 1rem;
   text-align: center;
   cursor: pointer;
-  transition: all 0.2s ease;
+  border: 1px solid #eef2f7;
+  background: #fbfdff;
+  transition: transform .12s ease, box-shadow .12s ease;
 }
+.student-card:hover { transform: translateY(-3px); box-shadow: 0 6px 18px rgba(2,6,23,0.04); }
 
-.student-card.present {
-  background: #d1f7d6;
-  border: 1px solid #27ae60;
+.student-card .name { font-weight: 700; color: #0f172a; display:block; }
+.student-card .status { margin-top: 6px; font-size: 0. nine rem; color: #475569; display:block; }
+
+.student-card.present { background: #e6ffef; border-color: #10b981; }
+.student-card.absent  { background: #fff1f2; border-color: #ef4444; }
+
+/* --- Submit button --- */
+.submit-area {
+  display:flex;
+  justify-content:center;
+  margin-top: 18px;
 }
-
-.student-card.absent {
-  background: #fde2e2;
-  border: 1px solid #e74c3c;
-}
-
-.student-card.on-leave {
-  background: #fff3cd;
-  border: 1px solid #f1c40f;
-  cursor: not-allowed;
-  opacity: 0.7;
-}
-
-.student-card:hover:not(.on-leave) {
-  transform: translateY(-3px);
-}
-
-.student-name {
-  font-weight: 600;
-  margin-bottom: 0.5rem;
-}
-
-.status-indicator {
-  font-size: 0.9rem;
-}
-
 .submit-btn {
-  background: #16a085;
-  color: white;
-  padding: 0.8rem 1.5rem;
+  padding: 10px 22px;
+  border-radius: 10px;
+  background: #0f4c81;
+  color: #fff;
   border: none;
-  border-radius: 8px;
+  font-weight: 700;
   cursor: pointer;
-  font-weight: 600;
-  transition: all 0.2s ease;
 }
+.submit-btn:disabled { opacity: 0.55; cursor: not-allowed; }
 
-.submit-btn:hover {
-  background: #149174;
-}
-
-.submit-btn:disabled {
-  background: #ccc;
-  cursor: not-allowed;
+/* --- Responsive tweaks --- */
+@media (max-width: 720px) {
+  .class-grid { grid-template-columns: repeat(1, 1fr); }
+  .student-grid { grid-template-columns: repeat(2, 1fr); }
+  .mark-attendance-container { padding: 18px; }
 }

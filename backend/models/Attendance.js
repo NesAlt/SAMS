@@ -6,10 +6,10 @@ const AttendanceSchema = new mongoose.Schema({
     ref: 'User',
     required: true
   },
-  teacherAssignment: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'TeacherAssignment',
-    required: true
+  timetable: {
+  type: mongoose.Schema.Types.ObjectId,
+  ref: 'Timetable',
+  required: true
   },
   date: {
     type: Date,
@@ -29,11 +29,24 @@ const AttendanceSchema = new mongoose.Schema({
     ref: 'User',
     required: true
   },
+    from: {
+    type: String,
+    required: true
+  },
+  to: {
+    type: String,
+    required: true
+  },
   approvedLeave: {
     type: Boolean,
     default: false
+  },
+  category: {
+  type: String,
+  enum: ['regular_class', 'revision', 'extra'],
+  default: 'regular_class'
   }
-}, {
+},{
   timestamps: true
 });
 

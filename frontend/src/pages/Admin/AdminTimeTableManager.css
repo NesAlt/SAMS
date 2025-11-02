@@ -1,0 +1,78 @@
+.admin-timetable {
+  padding: 20px;
+  font-family: "Poppins", sans-serif;
+}
+
+.filters {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.add-timetable-form {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 25px;
+}
+
+.add-timetable-form input,
+.add-timetable-form select {
+  padding: 6px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+}
+
+.timetable-grid table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.timetable-grid th,
+.timetable-grid td {
+  border: 1px solid #ddd;
+  padding: 10px;
+  vertical-align: top;
+}
+
+.day-cell {
+  font-weight: bold;
+  width: 100px;
+  background: #f8f8f8;
+}
+
+.day-schedule {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.entry-card {
+  background: #f4f9ff;
+  border: 1px solid #cde0ff;
+  border-radius: 8px;
+  padding: 8px;
+  min-width: 120px;
+  text-align: center;
+  position: relative;
+}
+
+.entry-card small {
+  color: #666;
+}
+
+.btn_del {
+  background-color: #ff4d4f;
+  color: white;
+  border: none;
+  padding: 3px 6px;
+  border-radius: 4px;
+  font-size: 0.8em;
+  cursor: pointer;
+  margin-top: 5px;
+}
+
+.empty-cell {
+  color: #aaa;
+  font-style: italic;
+}

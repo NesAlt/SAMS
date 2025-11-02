@@ -1,132 +1,280 @@
-import axios from "../../utils/axiosInstance";
 import { useEffect, useState } from "react";
+import axiosInstance from "../../utils/axiosInstance";
+import { CheckCircle } from "lucide-react";
 import "./TeacherAttendance.css";
 
 const MarkAttendance = () => {
-  const [assignments, setAssignments] = useState([]);
+  const [semesters, setSemesters] = useState([]);
+  const [selectedSemester, setSelectedSemester] = useState("");
+  const [upcomingClasses, setUpcomingClasses] = useState([]);
   const [selectedClass, setSelectedClass] = useState(null);
   const [students, setStudents] = useState([]);
-  const [date, setDate] = useState(new Date().toISOString().split("T")[0]);
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [category, setCategory] = useState("regular_class");
+  const [attendanceData, setAttendanceData] = useState({});
+  const [copyToNext, setCopyToNext] = useState(false);
+  const [copiedAttendance, setCopiedAttendance] = useState(null);
+  const [nextTimetableId, setNextTimetableId] = useState(null);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    const fetchAssignments = async () => {
+    const fetchSemesters = async () => {
       try {
-        const { data } = await axios.get("/teacherUser/my_assignments");
-        setAssignments(data);
+        const res = await axiosInstance.get("/teacherUser/my_timetable");
+        const uniqueSems = [...new Set(res.data.map((t) => t.semester))];
+        setSemesters(uniqueSems);
       } catch (err) {
-        console.error("Error fetching assignments:", err);
+        console.error("Error fetching semesters:", err);
       }
     };
-    fetchAssignments();
+    fetchSemesters();
   }, []);
 
-  const fetchStudents = async (className) => {
+  useEffect(() => {
+    if (!selectedSemester) return;
+    const fetchUpcoming = async () => {
+      try {
+        const res = await axiosInstance.get(
+          `/teacherUser/upcoming/${selectedSemester}`
+        );
+        setUpcomingClasses(res.data);
+      } catch (err) {
+        console.error("Error fetching upcoming classes:", err);
+      }
+    };
+    fetchUpcoming();
+  }, [selectedSemester]);
+
+  const handleSelectClass = async (classData) => {
     try {
-      const { data } = await axios.get(
-        `/teacherUser/class/${className}/students?date=${date}`
+      const statusRes = await axiosInstance.get(
+        `/teacherUser/attendance/status/${classData._id}`
       );
-      setStudents(data.students || []);
-      setSelectedClass(className);
+      const alreadyMarked = statusRes.data.marked;
+
+      const res = await axiosInstance.get(
+        `/teacherUser/class/${classData.class}/students?timetableId=${classData._id}`
+      );
+
+      let initialAttendance = {};
+      if (copiedAttendance && copiedAttendance.nextTimetableId === classData._id) {
+        initialAttendance = { ...copiedAttendance.data };
+      } else {
+        res.data.students.forEach((s) => {
+          initialAttendance[s._id] = s.existingStatus || "absent";
+        });
+      }
+
+      setStudents(res.data.students || []);
+      setAttendanceData(initialAttendance);
+      setSelectedClass({ ...classData, alreadyMarked });
+
+      if (copiedAttendance && copiedAttendance.nextTimetableId === classData._id) {
+        setCopiedAttendance(null);
+      }
+      
+      const currentIndex = upcomingClasses.findIndex(
+        (c) => c._id === classData._id
+      );
+      setNextTimetableId(
+        currentIndex !== -1 ? upcomingClasses[currentIndex + 1]?._id : null
+      );
     } catch (err) {
       console.error("Error fetching students:", err);
     }
   };
 
-  const toggleStatus = (id) => {
-    setStudents((prev) =>
-      prev.map((s) =>
-        s._id === id && !s.onLeave
-          ? { ...s, status: s.status === "present" ? "absent" : "present" }
-          : s
-      )
-    );
+  const toggleAttendance = (id) => {
+    if (selectedClass?.alreadyMarked) return;
+    setAttendanceData((prev) => ({
+      ...prev,
+      [id]: prev[id] === "present" ? "absent" : "present",
+    }));
+  };
+
+  const markAll = (status) => {
+    if (selectedClass?.alreadyMarked) return;
+    const updated = {};
+    students.forEach((s) => (updated[s._id] = status));
+    setAttendanceData(updated);
   };
 
   const handleSubmit = async () => {
-    if (!selectedClass || students.length === 0) return;
+    if (!selectedClass || selectedClass.alreadyMarked) {
+      alert("Attendance already marked for this class!");
+      return;
+    }
 
-    setIsSubmitting(true);
-    const selectedAssignment = assignments.find((a) => a.class === selectedClass);
-
-    const payload = {
-      teacherAssignment: selectedAssignment?._id,
-      date,
-      students: students.map((s) => ({
-        studentId: s._id,
-        status: s.onLeave ? "present" : s.status || "absent",
-      })),
-    };
-
+    setLoading(true);
     try {
-      await axios.post("/teacherUser/attendance/bulk", payload);
-      alert("Attendance successfully submitted!");
+      const studentsPayload = students.map((s) => ({
+        studentId: s._id,
+        status: attendanceData[s._id] || "absent",
+      }));
+
+      const payload = {
+        timetable: selectedClass._id,
+        date: new Date(),
+        students: studentsPayload,
+        category,
+      };
+
+      if (copyToNext && nextTimetableId) {
+        setCopiedAttendance({
+          nextTimetableId,
+          data: { ...attendanceData },
+        });      
+      }
+
+      await axiosInstance.post("/teacherUser/attendance/bulk", payload);
+      alert("Attendance marked successfully!");
+
+      setSelectedClass({ ...selectedClass, alreadyMarked: true });
+
+      setUpcomingClasses((prev) =>
+        prev.map((cls) =>
+          cls._id === selectedClass._id ? { ...cls, isMarked: true } : cls
+        )
+      );
     } catch (err) {
       console.error("Error submitting attendance:", err);
-      alert("Failed to submit attendance.");
+      alert("Failed to mark attendance!");
     } finally {
-      setIsSubmitting(false);
+      setLoading(false);
     }
   };
 
   return (
-    <div className="mark-attendance">
+    <div className="mark-attendance-container">
       <h2>Mark Attendance</h2>
 
-      <div className="assignment-list">
-        {assignments.map((a) => (
-          <div
-            key={a._id}
-            className={`assignment-card ${
-              selectedClass === a.class ? "selected" : ""
-            }`}
-            onClick={() => fetchStudents(a.class)}
-          >
-            <h4>{a.class}</h4>
-            <p>{a.subject} — Semester {a.semester}</p>
-          </div>
-        ))}
+      <div className="semester-select">
+        <label>Select Semester:</label>
+        <select
+          value={selectedSemester}
+          onChange={(e) => setSelectedSemester(e.target.value)}
+        >
+          <option value="">-- Choose Semester --</option>
+          {semesters.map((s, i) => (
+            <option key={i} value={s}>
+              {s}
+            </option>
+          ))}
+        </select>
       </div>
+
+      {selectedSemester && (
+        <div className="upcoming-classes">
+          <h3>Upcoming Classes</h3>
+          <div className="class-grid">
+            {upcomingClasses.map((cls) => (
+              <div
+                key={cls._id}
+                className={`class-card ${
+                  cls.isMarked ? "marked" : ""
+                } ${selectedClass?._id === cls._id ? "active" : ""}`}
+                onClick={() => handleSelectClass(cls)}
+              >
+                <h4>{cls.class}</h4>
+                <p>{cls.subject}</p>
+                <p>
+                  {cls.dayOfWeek} ({cls.startTime} - {cls.endTime})
+                </p>
+                <p className="class-date">
+                  {new Date(cls.date).toLocaleDateString()}
+                </p>
+
+                {cls.isMarked && (
+                  <div className="marked-indicator">
+                    <CheckCircle size={20} color="green" />
+                    <span>Attendance Marked</span>
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {selectedClass && (
         <div className="attendance-section">
+          <h3>
+            {selectedClass.class} - {selectedClass.subject}
+          </h3>
 
-          <div className="attendance-header">
-            <h3>Class: {selectedClass}</h3>
-            <label>
-              Date:
+          <div className="control-buttons">
+            <button
+              className="btn btn-present"
+              onClick={() => markAll("present")}
+              disabled={selectedClass.alreadyMarked}
+            >
+              Mark All Present
+            </button>
+            <button
+              className="btn btn-absent"
+              onClick={() => markAll("absent")}
+              disabled={selectedClass.alreadyMarked}
+            >
+              Mark All Absent
+            </button>
+
+            <label className="copy-control">
               <input
-                type="date"
-                value={date}
-                onChange={(e) => setDate(e.target.value)}
+                type="checkbox"
+                checked={copyToNext}
+                onChange={() => setCopyToNext(!copyToNext)}
+                disabled={selectedClass.alreadyMarked}
               />
+              Copy to Next Hour
             </label>
+
+            <select
+              className="category-select"
+              value={category}
+              onChange={(e) => setCategory(e.target.value)}
+              disabled={selectedClass.alreadyMarked}
+            >
+              <option value="regular_class">Regular Class</option>
+              <option value="revision">Revision</option>
+              <option value="extra">Extra</option>
+            </select>
           </div>
 
           <div className="student-grid">
-            {students.map((s) => (
+            {students.map((student) => (
               <div
-                key={s._id}
+                key={student._id}
                 className={`student-card ${
-                  s.onLeave ? "on-leave" : s.status === "present" ? "present" : "absent"
+                  attendanceData[student._id] === "present" ? "present" : "absent"
                 }`}
-                onClick={() => !s.onLeave && toggleStatus(s._id)}
+                onClick={() =>
+                  !selectedClass.alreadyMarked && toggleAttendance(student._id)
+                }
               >
-                <div className="student-name">{s.name}</div>
-                <div className="status-indicator">
-                  {s.onLeave ? " Leave" : s.status === "present" ? " Present" : " Absent"}
-                </div>
+                <span className="name">{student.name}</span>
+                <span className="status">
+                  {selectedClass.alreadyMarked ? (
+                    attendanceData[student._id] === "present" ? "✅ Present" : "❌ Absent"
+                  ) : (
+                    attendanceData[student._id]
+                  )}
+                </span>
               </div>
             ))}
           </div>
 
-          <button
-            className="submit-btn"
-            onClick={handleSubmit}
-            disabled={isSubmitting}
-          >
-            {isSubmitting ? "Submitting..." : "Submit Attendance"}
-          </button>
+          <div className="submit-area">
+            <button
+              className="submit-btn"
+              onClick={handleSubmit}
+              disabled={loading || selectedClass.alreadyMarked}
+            >
+              {selectedClass.alreadyMarked
+                ? "Already Marked ✅"
+                : loading
+                ? "Submitting..."
+                : "Submit Attendance"}
+            </button>
+          </div>
         </div>
       )}
     </div>

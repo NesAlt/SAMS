@@ -1,10 +1,12 @@
 const Joi = require('joi');
 Joi.objectId = require('joi-objectid')(Joi);
 
+const timePattern = /^([0-1]\d|2[0-3]):([0-5]\d)$/;
+
 const AttendanceSchema = Joi.object({
   studentId:Joi.objectId().required(),
 
-  teacherAssignment: Joi.objectId().required(),
+  timetable: Joi.objectId().required(),
 
   date:Joi.date().required(),
 
@@ -15,8 +17,20 @@ const AttendanceSchema = Joi.object({
   reason:Joi.string().max(255).optional().allow(''),
 
   markedBy:Joi.objectId().optional(),
-  
-  approvedLeave:Joi.boolean().default(false)
+
+   from: Joi.string().pattern(timePattern).required().messages({
+    'string.pattern.base': '"from" must be in HH:mm format (e.g. 09:00)'
+  }),
+
+  to: Joi.string().pattern(timePattern).required().messages({
+    'string.pattern.base': '"to" must be in HH:mm format (e.g. 10:00)'
+  }),
+
+  approvedLeave:Joi.boolean().default(false),
+
+  category: Joi.string()
+  .valid('regular_class', 'revision', 'extra')
+  .default('regular_class')
 });
 
 module.exports={AttendanceSchema};

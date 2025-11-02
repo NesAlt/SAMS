@@ -5,6 +5,10 @@ const TimetableSchema = new mongoose.Schema({
     type: String,
     required: true
   },
+    semester: {
+    type: String,
+    required: true
+  },
   subject: {
     type: String,
     required: true
@@ -16,7 +20,7 @@ const TimetableSchema = new mongoose.Schema({
   },
   dayOfWeek: {
     type: String,
-    enum: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'],
+    enum: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'],
     required: true
   },
   startTime: {

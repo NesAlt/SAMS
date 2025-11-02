@@ -3,12 +3,13 @@ const csv = require('csv-parser');
 const User = require('../models/User');
 const Attendance = require("../models/Attendance");
 const { registerUserSchema } = require('../dtos/user.dto');
-const TeacherAssignment = require('../models/TeacherAssignment');
-const { TeacherAssignmentSchema } = require('../dtos/teacherAssignment.dtos');
+// const TeacherAssignment = require('../models/TeacherAssignment');
+// const { TeacherAssignmentSchema } = require('../dtos/teacherAssignment.dtos');
 const Event = require('../models/Event');
 const { EventSchema } = require('../dtos/event.dto');
 const { WorkingDaysSchema } = require("../dtos/workingDays.dto");
 const WorkingDays = require("../models/WorkingDays");
+const Timetable = require('../models/Timetable');
 
 exports.getAllUsers = async (req, res) => {
   try {
@@ -153,84 +154,84 @@ exports.deleteUser = async (req, res) => {
   }
 };
 
-exports.getAllAssignments = async (req, res) => {
-  try {
-    const assignments = await TeacherAssignment.find()
-      .populate('teacher', 'name email')
-      .sort({ createdAt: -1 });
+// exports.getAllAssignments = async (req, res) => {
+//   try {
+//     const assignments = await TeacherAssignment.find()
+//       .populate('teacher', 'name email')
+//       .sort({ createdAt: -1 });
 
-    res.json(assignments);
-  } catch (err) {
-    res.status(500).json({ error: 'Server Error during Get Teachers' });
-  }
-};
+//     res.json(assignments);
+//   } catch (err) {
+//     res.status(500).json({ error: 'Server Error during Get Teachers' });
+//   }
+// };
 
-exports.addAssignment = async (req, res) => {
-  try {
-    const { error } = TeacherAssignmentSchema.validate(req.body);
-    if (error) return res.status(400).json({ error: error.details[0].message });
+// exports.addAssignment = async (req, res) => {
+//   try {
+//     const { error } = TeacherAssignmentSchema.validate(req.body);
+//     if (error) return res.status(400).json({ error: error.details[0].message });
 
-    const { teacher, class: className, subject, semester } = req.body;
+//     const { teacher, class: className, subject, semester } = req.body;
 
-    const teacherExists = await User.findById(teacher);
-    if (!teacherExists || teacherExists.role !== 'teacher') {
-      return res.status(400).json({ error: 'Invalid Teacher ID' });
-    }
+//     const teacherExists = await User.findById(teacher);
+//     if (!teacherExists || teacherExists.role !== 'teacher') {
+//       return res.status(400).json({ error: 'Invalid Teacher ID' });
+//     }
 
-    const existing = await TeacherAssignment.findOne({
-      teacher,
-      class: className,
-      subject,
-      semester,
-    });
+//     const existing = await TeacherAssignment.findOne({
+//       teacher,
+//       class: className,
+//       subject,
+//       semester,
+//     });
 
-    if (existing) {
-      return res.status(400).json({ error: 'Assignment already exists for this teacher' });
-    }
+//     if (existing) {
+//       return res.status(400).json({ error: 'Assignment already exists for this teacher' });
+//     }
 
-    let newAssignment = await TeacherAssignment.create({
-      teacher,
-      class: className,
-      subject,
-      semester,
-    });
+//     let newAssignment = await TeacherAssignment.create({
+//       teacher,
+//       class: className,
+//       subject,
+//       semester,
+//     });
 
-    newAssignment = await newAssignment.populate('teacher','name email');
+//     newAssignment = await newAssignment.populate('teacher','name email');
 
-    res.status(201).json(newAssignment);
-  } catch (err) {
-    res.status(500).json({ error: 'Server issue with adding assignment' });
-  }
-};
+//     res.status(201).json(newAssignment);
+//   } catch (err) {
+//     res.status(500).json({ error: 'Server issue with adding assignment' });
+//   }
+// };
 
-exports.updateAssignment = async (req, res) => {
-  try {
-    const { id } = req.params;
-    const updated = await TeacherAssignment.findByIdAndUpdate(id, req.body, {
-      new: true,
-      runValidators: true,
-    }).populate('teacher','name email');
+// exports.updateAssignment = async (req, res) => {
+//   try {
+//     const { id } = req.params;
+//     const updated = await TeacherAssignment.findByIdAndUpdate(id, req.body, {
+//       new: true,
+//       runValidators: true,
+//     }).populate('teacher','name email');
 
-    if (!updated) return res.status(404).json({ error: 'Assignment not found' });
+//     if (!updated) return res.status(404).json({ error: 'Assignment not found' });
 
-    res.json(updated);
-  } catch (err) {
-    res.status(500).json({ error: 'Server error with updating assignment' });
-  }
-};
+//     res.json(updated);
+//   } catch (err) {
+//     res.status(500).json({ error: 'Server error with updating assignment' });
+//   }
+// };
 
-exports.deleteAssignment = async (req, res) => {
-  try {
-    const { id } = req.params;
-    const deleted = await TeacherAssignment.findByIdAndDelete(id);
+// exports.deleteAssignment = async (req, res) => {
+//   try {
+//     const { id } = req.params;
+//     const deleted = await TeacherAssignment.findByIdAndDelete(id);
 
-    if (!deleted) return res.status(404).json({ error: 'Assignment not found' });
+//     if (!deleted) return res.status(404).json({ error: 'Assignment not found' });
 
-    res.json({ message: 'Assignment deleted successfully' });
-  } catch (err) {
-    res.status(500).json({ error: 'Server issue while deleting assignment' });
-  }
-};
+//     res.json({ message: 'Assignment deleted successfully' });
+//   } catch (err) {
+//     res.status(500).json({ error: 'Server issue while deleting assignment' });
+//   }
+// };
 
 exports.createEvent = async (req, res) => {
   try {
@@ -390,7 +391,6 @@ exports.getMonthlyReport = async (req, res) => {
       return res.json({ message: "No attendance data found for this class in the selected month." });
     }
 
-    // Group by student → subject
     const studentReports = {};
 
     filtered.forEach((rec) => {
@@ -405,7 +405,6 @@ exports.getMonthlyReport = async (req, res) => {
       if (rec.status === "present") studentReports[studentName][subject].present++;
     });
 
-    // Convert to array (per subject)
     const report = [];
     for (const [studentName, subjects] of Object.entries(studentReports)) {
       for (const [subject, data] of Object.entries(subjects)) {
@@ -484,5 +483,62 @@ exports.getSemesterReport = async (req, res) => {
   } catch (err) {
     console.error("Error generating semester report:", err);
     res.status(500).json({ message: "Server error generating semester report." });
+  }
+};
+
+exports.addTimetableEntry = async (req, res) => {
+  try {
+    const { class: className, semester, subject, teacher, dayOfWeek, startTime, endTime, room } = req.body;
+
+    if (!className || !semester || !subject || !teacher || !dayOfWeek || !startTime || !endTime) {
+      return res.status(400).json({ message: 'All required fields must be provided.' });
+    }
+
+    const teacherExists = await User.findById(teacher);
+    if (!teacherExists || teacherExists.role !== 'teacher') {
+      return res.status(400).json({ message: 'Invalid teacher ID.' });
+    }
+
+    const newEntry = new Timetable({
+      class: className,
+      semester,
+      subject,
+      teacher,
+      dayOfWeek,
+      startTime,
+      endTime,
+      room
+    });
+
+    await newEntry.save();
+    res.status(201).json({ message: 'Timetable entry added successfully.', timetable: newEntry });
+  } catch (err) {
+    console.error('Error adding timetable entry:', err);
+    res.status(500).json({ message: 'Server error adding timetable entry.' });
+  }
+};
+
+exports.getTimetableByClass = async (req, res) => {
+  try {
+    const { className, semester } = req.params;
+    const timetable = await Timetable.find({ class: className, semester })
+      .populate('teacher', 'name email')
+      .sort({ dayOfWeek: 1, startTime: 1 });
+
+    res.json({ className, semester, timetable });
+  } catch (err) {
+    console.error('Error fetching timetable:', err);
+    res.status(500).json({ message: 'Server error fetching timetable.' });
+  }
+};
+
+exports.deleteTimetableEntry = async (req, res) => {
+  try {
+    const { id } = req.params;
+    await Timetable.findByIdAndDelete(id);
+    res.json({ message: 'Timetable entry deleted successfully.' });
+  } catch (err) {
+    console.error('Error deleting timetable entry:', err);
+    res.status(500).json({ message: 'Server error deleting timetable entry.' });
   }
 };

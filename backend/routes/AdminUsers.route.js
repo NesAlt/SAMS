@@ -13,10 +13,10 @@ router.post('/add-user', protect, isAdmin, adminController.addUser);
 router.put('/update-user/:id', protect ,isAdmin, adminController.updateUser);
 router.delete('/delete-user/:id', protect ,isAdmin, adminController.deleteUser);
 
-router.get('/all', protect, isAdmin, adminController.getAllAssignments);
-router.post('/add', protect, isAdmin, adminController.addAssignment);
-router.put('/update/:id', protect, isAdmin, adminController.updateAssignment);
-router.delete('/delete/:id', protect, isAdmin, adminController.deleteAssignment); 
+// router.get('/all', protect, isAdmin, adminController.getAllAssignments);
+// router.post('/add', protect, isAdmin, adminController.addAssignment);
+// router.put('/update/:id', protect, isAdmin, adminController.updateAssignment);
+// router.delete('/delete/:id', protect, isAdmin, adminController.deleteAssignment); 
 
 router.post('/event_add',protect,isAdmin,adminController.createEvent);
 router.get('/get_events',protect,isAdmin,adminController.getAllEvents);
@@ -30,5 +30,9 @@ router.put('/update_working_days/:semester',protect,isAdmin,adminController.upda
 router.get("/classes", protect,isAdmin, adminController.getAllClasses);
 router.get("/reports/monthly/:className/:month/:year", protect,isAdmin, adminController.getMonthlyReport);
 router.get("/reports/semester/:className/:semester", protect,isAdmin, adminController.getSemesterReport);
+
+router.post('/timetableAdd', protect, isAdmin, adminController.addTimetableEntry);
+router.get('/timetable/:className/:semester', protect, isAdmin, adminController.getTimetableByClass);
+router.delete('/timetable/:id', protect, isAdmin, adminController.deleteTimetableEntry);
 
 module.exports = router;
