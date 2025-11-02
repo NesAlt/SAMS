@@ -3,8 +3,8 @@ const router = express.Router();
 const { protect, isStudent } = require("../middleware/auth.middleware");
 const studentController = require("../controller/StudentUser.controller");
 
-// GET attendance of logged-in student
 router.get("/attendance", protect, isStudent, studentController.getMyAttendance);
+router.get("/subjects", protect, isStudent, studentController.getMySubjects);
 
 router.get("/leaves",protect,isStudent,studentController.getMyLeaves);
 router.post("/send_leave",protect,isStudent,studentController.applyLeave);

@@ -9,11 +9,7 @@ const WorkingDays = require("../models/WorkingDays");
 exports.getMyAttendance = async (req, res) => {
   try {
     const studentId = new mongoose.Types.ObjectId(req.user.id);
-
-    const student = await User.findById(studentId).lean();
-    if (!student) {
-      return res.status(404).json({ message: "Student not found." });
-    }
+    const subjectFilter = req.query.subject;
 
     const attendanceRecords = await Attendance.find({ studentId })
       .populate({
@@ -23,80 +19,108 @@ exports.getMyAttendance = async (req, res) => {
       .lean();
 
     if (!attendanceRecords.length) {
-      return res.json({
-        requiredPercentage: 75,
-        overallPercentage: 0,
-        totalWorkingDays: 0,
-        status: "No Attendance Records",
-        daily: [],
-        monthly: [],
-        semester: null,
-      });
+      return res.status(404).json({ message: "No attendance records found." });
     }
 
-    const semester = attendanceRecords[0]?.timetable?.semester;
-    if (!semester) {
-      return res.status(400).json({ message: "Semester info missing in records." });
+    // Filter by subject if provided
+    let filteredRecords = attendanceRecords;
+    if (subjectFilter) {
+      filteredRecords = attendanceRecords.filter(
+        (r) => r.timetable?.subject === subjectFilter
+      );
     }
 
-    const workingDays = await WorkingDays.findOne({ semester });
-    if (!workingDays) {
-      return res.status(404).json({
-        message: "Working days not set for this semester.",
-        overallPercentage: 0,
-      });
+    if (!filteredRecords.length) {
+      return res.status(404).json({ message: "No attendance found for this subject." });
     }
 
-    const totalWorkingDays = workingDays.totalWorkingDays || 0;
-    const presentCount = attendanceRecords.filter(a => a.status === "present").length;
-
-    const overallPercentage =
-      totalWorkingDays > 0 ? Math.round((presentCount / totalWorkingDays) * 100) : 0;
-
-    const requiredPercentage = 75;
-    const status = overallPercentage >= requiredPercentage ? "Above Required" : "Behind";
-
-    const daily = attendanceRecords.map(a => ({
-      date: a.date,
-      class: a.timetable.class,
-      subject: a.timetable.subject,
-      status: a.status,
+    // --- DAILY ATTENDANCE ---
+    const daily = filteredRecords.map((record) => ({
+      date: record.date,
+      class: record.timetable.class,
+      status: record.status,
     }));
 
+    // --- MONTHLY ATTENDANCE ---
     const monthlyMap = {};
-    attendanceRecords.forEach(a => {
-      const key = `${a.date.getMonth() + 1}-${a.date.getFullYear()}`;
-      if (!monthlyMap[key]) monthlyMap[key] = { total: 0, present: 0 };
-      monthlyMap[key].total++;
-      if (a.status === "present") monthlyMap[key].present++;
+    filteredRecords.forEach((record) => {
+      const monthKey = new Date(record.date).toLocaleString("default", {
+        month: "short",
+        year: "numeric",
+      });
+      if (!monthlyMap[monthKey]) monthlyMap[monthKey] = { present: 0, total: 0 };
+      monthlyMap[monthKey].total++;
+      if (record.status === "present") monthlyMap[monthKey].present++;
     });
+    const monthly = Object.entries(monthlyMap).map(([month, data]) => ({
+      month,
+      percentage: ((data.present / data.total) * 100).toFixed(2),
+    }));
 
-    const monthly = Object.entries(monthlyMap).map(([key, stats]) => {
-      const [month, year] = key.split("-");
-      return {
-        month: parseInt(month),
-        year: parseInt(year),
-        totalClasses: stats.total,
-        present: stats.present,
-        percentage: Math.round((stats.present / stats.total) * 100),
-      };
-    });
+    // --- SEMESTER ATTENDANCE ---
+    const semester = filteredRecords[0].timetable.semester;
+    const totalClasses = filteredRecords.length;
+    const totalPresent = filteredRecords.filter((r) => r.status === "present").length;
+    const overallPercentage = ((totalPresent / totalClasses) * 100).toFixed(2);
+    const requiredPercentage = 75;
+    const status = overallPercentage >= requiredPercentage ? "Above Required" : "Below Required";
 
+    // --- RESPONSE ---
     res.json({
-      requiredPercentage,
+      subject: subjectFilter || "All Subjects",
+      semester,
       overallPercentage,
-      totalWorkingDays,
+      requiredPercentage,
       status,
       daily,
       monthly,
-      semester,
     });
-
   } catch (err) {
     console.error("Error fetching student attendance:", err);
-    res.status(500).json({
-      error: err.message || "Server error while fetching attendance",
-    });
+    res.status(500).json({ message: "Server error fetching attendance." });
+  }
+};
+
+exports.getMySubjects = async (req, res) => {
+  try {
+    const studentId = req.user.id;
+
+    const subjects = await Attendance.aggregate([
+      { $match: { studentId: new mongoose.Types.ObjectId(studentId) } },
+      {
+        $lookup: {
+          from: "timetables",
+          localField: "timetable",
+          foreignField: "_id",
+          as: "timetable",
+        },
+      },
+      { $unwind: "$timetable" },
+      {
+        $group: {
+          _id: "$timetable.subject",
+          class: { $first: "$timetable.class" },
+          semester: { $first: "$timetable.semester" },
+        },
+      },
+      {
+        $project: {
+          _id: 0,
+          subject: "$_id",
+          class: 1,
+          semester: 1,
+        },
+      },
+    ]);
+
+    if (!subjects.length) {
+      return res.status(404).json({ message: "No subjects found." });
+    }
+
+    res.json(subjects);
+  } catch (err) {
+    console.error("Error fetching student subjects:", err);
+    res.status(500).json({ message: "Server error fetching subjects." });
   }
 };
 

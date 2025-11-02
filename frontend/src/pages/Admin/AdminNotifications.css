@@ -1,0 +1,49 @@
+.admin-notifications {
+  padding: 20px;
+  color: #333;
+}
+
+.notification-form {
+  background: #f9f9f9;
+  padding: 16px;
+  border-radius: 12px;
+  margin-bottom: 30px;
+}
+
+.notification-form select,
+.notification-form textarea {
+  width: 100%;
+  margin: 8px 0;
+  padding: 10px;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+}
+
+.notification-form button {
+  background: #16a085;
+  color: white;
+  padding: 10px 15px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.notification-form button:hover {
+  background: #13856d;
+}
+
+.notification-list table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.notification-list th,
+.notification-list td {
+  padding: 10px;
+  border-bottom: 1px solid #ddd;
+}
+
+.notification-list th {
+  background: #16a085;
+  color: white;
+}

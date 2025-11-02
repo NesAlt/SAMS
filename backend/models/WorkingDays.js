@@ -10,6 +10,10 @@ const WorkingDaysSchema = new mongoose.Schema({
     type: Number,
     required: true,
   },
+    totalSessions: {
+    type: Number,
+    default: 0,
+  },
   createdBy: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',

@@ -65,14 +65,28 @@ const AdminReports = () => {
     doc.text(`Type: ${reportType.toUpperCase()}`, 14, 34);
     doc.text(`Generated on: ${new Date().toLocaleString()}`, 14, 40);
 
-    const tableColumn = ["Student Name", "Subject", "Present Days", "Total Days", "Percentage"];
-    const tableRows = reportData.map((r) => [
-      r.studentName || "N/A",
-      r.subject || "N/A",
-      r.presentDays || 0,
-      r.totalDays || 0,
-      `${r.percentage || 0}%`,
-    ]);
+    let tableColumn;
+    let tableRows;
+
+    if (reportType === "monthly") {
+      tableColumn = ["Student Name", "Subject", "Present Days", "Total Days", "Percentage"];
+      tableRows = reportData.map((r) => [
+        r.studentName || "N/A",
+        r.subject || "N/A",
+        r.presentDays || 0,
+        r.totalDays || 0,
+        `${r.percentage || 0}%`,
+      ]);
+    } else {
+      // semester (consolidated)
+      tableColumn = ["Student Name", "Present Days", "Total Days", "Percentage"];
+      tableRows = reportData.map((r) => [
+        r.studentName || "N/A",
+        r.presentDays || 0,
+        r.totalDays || 0,
+        `${r.percentage || 0}%`,
+      ]);
+    }
 
     autoTable(doc, {
       startY: 50,
@@ -163,7 +177,7 @@ const AdminReports = () => {
             <thead>
               <tr>
                 <th>Student Name</th>
-                <th>Subject</th>
+                {reportType === "monthly" && <th>Subject</th>}
                 <th>Present Days</th>
                 <th>Total Days</th>
                 <th>Percentage</th>
@@ -173,7 +187,7 @@ const AdminReports = () => {
               {reportData.map((row, idx) => (
                 <tr key={idx}>
                   <td>{row.studentName || "N/A"}</td>
-                  <td>{row.subject || "N/A"}</td>
+                  {reportType === "monthly" && <td>{row.subject || "N/A"}</td>}
                   <td>{row.presentDays || 0}</td>
                   <td>{row.totalDays || 0}</td>
                   <td>{`${row.percentage || 0}%`}</td>

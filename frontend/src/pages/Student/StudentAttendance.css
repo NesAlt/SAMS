@@ -43,3 +43,34 @@ th, td {
 .absent {
   color: red;
 }
+.subject-select {
+  margin: 1.5rem 0;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.subject-select label {
+  font-weight: bold;
+  color: #333;
+}
+
+.subject-select select {
+  padding: 0.5rem 0.75rem;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  background-color: #fff;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.subject-select select:hover {
+  border-color: #888;
+}
+
+.subject-select select:focus {
+  outline: none;
+  border-color: #007bff;
+  box-shadow: 0 0 4px rgba(0, 123, 255, 0.4);
+}

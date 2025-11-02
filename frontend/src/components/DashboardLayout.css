@@ -114,6 +114,76 @@ body {
 .dropdown-content p:hover {
   background-color: #454545a0;
 }
+/* Notifications Dropdown */
+.notifications-dropdown {
+  max-height: 350px;
+  overflow-y: auto;
+  width: 280px;
+  background-color: #1a1a1a;
+  border-radius: 12px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+  padding: 12px;
+  font-size: 0.95rem;
+  color: #f0f0f0;
+}
+
+/* Individual Notification Item */
+.notification-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 10px 14px;
+  margin-bottom: 8px;
+  border-radius: 8px;
+  transition: background 0.2s ease, transform 0.1s ease;
+  cursor: pointer;
+  background-color: #2a2a2a;
+}
+
+.notification-item.unread {
+  border-left: 4px solid #ff4b5c;
+}
+
+.notification-item.read {
+  opacity: 0.8;
+}
+
+.notification-item:hover {
+  background-color: #3a3a3a;
+  transform: translateY(-1px);
+}
+
+.notification-item p {
+  margin: 0;
+}
+
+.notification-item strong {
+  color: #ffb400;
+}
+
+.notification-item small {
+  color: #aaa;
+  font-size: 0.8rem;
+}
+
+/* Scrollbar Styling for Modern Look */
+.notifications-dropdown::-webkit-scrollbar {
+  width: 6px;
+}
+
+.notifications-dropdown::-webkit-scrollbar-track {
+  background: #1a1a1a;
+  border-radius: 6px;
+}
+
+.notifications-dropdown::-webkit-scrollbar-thumb {
+  background-color: #555;
+  border-radius: 6px;
+}
+
+.notifications-dropdown::-webkit-scrollbar-thumb:hover {
+  background-color: #888;
+}
 
 /* Page Content */
 .page-content {

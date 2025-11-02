@@ -23,9 +23,9 @@ router.get('/get_events',protect,isAdmin,adminController.getAllEvents);
 router.delete('/del_event/:id',protect,isAdmin,adminController.deleteEvent);
 router.put('/update_event/:id',protect,isAdmin,adminController.updateEvent);
 
-router.post('/working_days',protect,isAdmin,adminController.setWorkingDays);
-router.get('/fetch_working_days',protect,isAdmin,adminController.getWorkingDays);
-router.put('/update_working_days/:semester',protect,isAdmin,adminController.updateWorkingDays);
+router.post('/total_sessions',protect,isAdmin,adminController.setTotalSessions);
+router.get('/fetch_total_sessions',protect,isAdmin,adminController.getTotalSessions);
+router.put('/update_total_sessions/:semester',protect,isAdmin,adminController.updateTotalSessions);
 
 router.get("/classes", protect,isAdmin, adminController.getAllClasses);
 router.get("/reports/monthly/:className/:month/:year", protect,isAdmin, adminController.getMonthlyReport);

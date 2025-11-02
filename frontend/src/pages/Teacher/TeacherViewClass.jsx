@@ -49,10 +49,10 @@ const TeacherClass = () => {
       }
 
       const { data } = await axios.get(
-        `/teacherUser/class/${className}/students?${params.toString()}`
+        `/teacherUser/class/${className}/students/summary?${params.toString()}`
       );
       setStudents(data.students || []);
-      setSelectedClass(className);
+      // setSelectedClass(className);
     } catch (err) {
       console.error("Error fetching students:", err);
     }
@@ -122,8 +122,9 @@ const TeacherClass = () => {
               key={`${t.class}-${t.subject}`}
               className="assignment-card"
               onClick={() => {
-                fetchStudents(t.class, t._id);
+                setSelectedClass(t.class);
                 setSelectedTimetableId(t._id);
+                fetchStudents(t.class, t._id);
               }}
             >
               <h4>{t.class}</h4>

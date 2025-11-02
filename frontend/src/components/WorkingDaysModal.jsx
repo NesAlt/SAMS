@@ -10,7 +10,7 @@ const WorkingDaysModal = ({ isOpen, onClose, mode, initialData, onSubmit }) => {
     if (mode === "edit" && initialData) {
       const extractedSemester = String(initialData.semester).replace(/\D/g, "");
       setSemester(extractedSemester);
-      setTotalWorkingDays(initialData.totalWorkingDays);
+      setTotalWorkingDays(initialData.totalWorkingDays || "");
     } else {
       setSemester("");
       setTotalWorkingDays("");
@@ -19,18 +19,22 @@ const WorkingDaysModal = ({ isOpen, onClose, mode, initialData, onSubmit }) => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
+
     if (!semester || !totalWorkingDays) {
       alert("All fields are required.");
       return;
     }
-  const numericSemester = Number(semester);
-  if (isNaN(numericSemester)) {
-    alert("Semester must be a valid number (e.g., 1, 2, 3).");
-    return;
-  }
+
+    const numericSemester = Number(semester);
+    if (isNaN(numericSemester)) {
+      alert("Semester must be a valid number (e.g., 1, 2, 3).");
+      return;
+    }
+
     const formattedSemester = `Sem${numericSemester}`;
 
-    onSubmit({ semester:formattedSemester, totalWorkingDays: Number(totalWorkingDays) });
+    // 👇 Only send totalWorkingDays — backend will compute totalSessions automatically
+    onSubmit({ semester: formattedSemester, totalWorkingDays: Number(totalWorkingDays) });
   };
 
   if (!isOpen) return null;
@@ -56,7 +60,7 @@ const WorkingDaysModal = ({ isOpen, onClose, mode, initialData, onSubmit }) => {
             min="1"
             value={totalWorkingDays}
             onChange={(e) => setTotalWorkingDays(e.target.value)}
-            placeholder="Enter number of days"
+            placeholder="Enter total working days"
             required
           />
 
@@ -77,16 +81,10 @@ const WorkingDaysModal = ({ isOpen, onClose, mode, initialData, onSubmit }) => {
 WorkingDaysModal.propTypes = {
   isOpen: PropTypes.bool.isRequired,
   onClose: PropTypes.func.isRequired,
-  mode: PropTypes.oneOf(['add', 'edit']),
+  mode: PropTypes.oneOf(["add", "edit"]),
   initialData: PropTypes.shape({
-    semester: PropTypes.oneOfType([
-      PropTypes.string,
-      PropTypes.number,
-    ]),
-    totalWorkingDays: PropTypes.oneOfType([
-      PropTypes.string,
-      PropTypes.number,
-    ]),
+    semester: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+    totalWorkingDays: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
   }),
   onSubmit: PropTypes.func.isRequired,
 };

@@ -264,7 +264,7 @@ exports.getStudentsWithAttendance = async (req, res) => {
     }
 
     const allAttendance = await Attendance.find({
-      timetable: { $in: timetableIds },
+      timetable:{ $in: timetableIds },
       ...(filter === "month" && month ? dateFilter : {}),
     });
 
@@ -316,6 +316,48 @@ exports.getStudentsWithAttendance = async (req, res) => {
   }
 };
 
+exports.getStudentsByClassAndTimetable = async (req, res) => {
+  try {
+    const { className } = req.params;
+    const { timetableId } = req.query;
+
+    const teacherId = req.user.id;
+
+    const timetable = await Timetable.findOne({ _id: timetableId, teacher: teacherId });
+    if (!timetable) {
+      return res.status(404).json({ message: "Timetable not found or unauthorized" });
+    }
+
+    const students = await User.find({ class: className, role: "student" });
+
+    const startOfDay = new Date();
+    startOfDay.setHours(0, 0, 0, 0);
+    const endOfDay = new Date();
+    endOfDay.setHours(23, 59, 59, 999);
+
+    const todayAttendance = await Attendance.find({
+      timetable: timetableId,
+      date: { $gte: startOfDay, $lte: endOfDay },
+    });
+
+    const studentsWithStatus = students.map((student) => {
+      const record = todayAttendance.find(
+        (a) => a.studentId.toString() === student._id.toString()
+      );
+      return {
+        _id: student._id,
+        name: student.name,
+        email: student.email,
+        existingStatus: record ? record.status : "absent",
+      };
+    });
+
+    res.json({ students: studentsWithStatus });
+  } catch (err) {
+    console.error("Error fetching students for attendance:", err);
+    res.status(500).json({ message: "Server error fetching students" });
+  }
+};
 
 exports.getUpcomingClasses = async (req, res) => {
   try {

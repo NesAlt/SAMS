@@ -1,10 +1,9 @@
 import axios from "../../utils/axiosInstance";
 import { useState, useEffect } from "react";
 import WorkingDaysModal from "../../components/WorkingDaysModal.jsx";
-// import "./AdminSystem.css";
 
-const AdminWorkingDaysManager = () => {
-  const [workingDaysList, setWorkingDaysList] = useState([]);
+const AdminSessionManager = () => {
+  const [sessionList, setSessionList] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [mode, setMode] = useState("add");
   const [selectedRecord, setSelectedRecord] = useState(null);
@@ -12,17 +11,17 @@ const AdminWorkingDaysManager = () => {
   useEffect(() => {
     let isMounted = true;
 
-    const fetchWorkingDays = async () => {
+    const fetchSessions = async () => {
       try {
-        const { data } = await axios.get("/adminUser/fetch_working_days");
+        const { data } = await axios.get("/adminUser/fetch_total_sessions");
         if (!isMounted) return;
-        setWorkingDaysList(data);
+        setSessionList(data);
       } catch (err) {
-        console.error("Error fetching working days:", err);
+        console.error("Error fetching total sessions:", err);
       }
     };
 
-    fetchWorkingDays();
+    fetchSessions();
     return () => {
       isMounted = false;
     };
@@ -46,16 +45,16 @@ const AdminWorkingDaysManager = () => {
 
       if (mode === "edit") {
         const res = await axios.put(
-          `/adminUser/update_working_days/${selectedRecord.semester}`,
+          `/adminUser/update_total_sessions/${selectedRecord.semester}`,
           formData
         );
         updatedRecord = res.data.data || res.data;
       } else {
-        const { data } = await axios.post("/adminUser/working_days", formData);
+        const { data } = await axios.post("/adminUser/total_sessions", formData);
         updatedRecord = data.data || data;
       }
 
-      setWorkingDaysList((prev) =>
+      setSessionList((prev) =>
         mode === "edit"
           ? prev.map((r) =>
               r._id === selectedRecord._id ? updatedRecord : r
@@ -65,34 +64,34 @@ const AdminWorkingDaysManager = () => {
 
       setIsModalOpen(false);
     } catch (err) {
-      console.error("Error saving working days:", err);
-      alert("Failed to save working days record.");
+      console.error("Error saving total sessions:", err);
+      alert("Failed to save record.");
     }
   };
 
   return (
-    <div className="admin-workingdays-manager">
-      <h2>Working Days Manager</h2>
+    <div className="admin-session-manager">
+      <h2>Semester Session Manager</h2>
 
       <div className="button-group">
-        <button onClick={openAddModal}>Set Working Days</button>
+        <button onClick={openAddModal}>Set Total Sessions</button>
       </div>
 
       <table>
         <thead>
           <tr>
             <th>Semester</th>
-            <th>Total Working Days</th>
+            <th>Total Sessions</th>
             <th>Created By</th>
             <th>Created On</th>
             <th>Actions</th>
           </tr>
         </thead>
         <tbody>
-          {workingDaysList.map((record) => (
+          {sessionList.map((record) => (
             <tr key={record._id}>
               <td>{record.semester}</td>
-              <td>{record.totalWorkingDays}</td>
+              <td>{record.totalSessions}</td>
               <td>{record.createdBy?.name || "—"}</td>
               <td>{new Date(record.createdAt).toLocaleDateString()}</td>
               <td>
@@ -114,4 +113,4 @@ const AdminWorkingDaysManager = () => {
   );
 };
 
-export default AdminWorkingDaysManager;
+export default AdminSessionManager;

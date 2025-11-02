@@ -290,29 +290,40 @@ exports.updateEvent = async (req, res) => {
   }
 };
 
-exports.setWorkingDays = async (req, res) => {
+exports.setTotalSessions = async (req, res) => {
   try {
-    const { error, value } = WorkingDaysSchema.validate(req.body);
-    if (error) {
-      return res.status(400).json({ message: error.details[0].message });
-    }
-
-    const { semester, totalWorkingDays } = value;
+    const { semester, totalWorkingDays } = req.body;
 
     const existing = await WorkingDays.findOne({ semester });
     if (existing) {
       return res.status(400).json({ message: "Working days for this semester already set." });
     }
 
+    // 🔹 Calculate total sessions from timetable data
+    const timetables = await Timetable.find({ semester });
+    if (!timetables.length) {
+      return res.status(404).json({
+        message: "No timetable found for this semester. Add timetable first.",
+      });
+    }
+
+    // Count total unique (subject, dayOfWeek, time slot) combinations
+    const sessionsPerWeek = timetables.length; // each record = 1 hour session
+    const totalWeeks = Math.ceil(totalWorkingDays / 5); // assuming 5-day week
+    const totalSessions = sessionsPerWeek * totalWeeks;
+
+    // 🔹 Create record
     const record = new WorkingDays({
       semester,
       totalWorkingDays,
+      totalSessions,
       createdBy: req.user._id,
     });
+
     await record.save();
 
     res.status(201).json({
-      message: "Working days set successfully.",
+      message: "Working days and sessions calculated successfully.",
       data: record,
     });
   } catch (err) {
@@ -321,40 +332,41 @@ exports.setWorkingDays = async (req, res) => {
   }
 };
 
-exports.getWorkingDays = async (req, res) => {
+exports.getTotalSessions = async (req, res) => {
   try {
-    const records = await WorkingDays.find().populate('createdBy', 'name email role');
+    const records = await WorkingDays.find().populate("createdBy", "name email role");
     res.status(200).json(records);
   } catch (err) {
-    console.error("Error fetching working days:", err);
-    res.status(500).json({ message: "Server error while fetching working days." });
+    console.error("Error fetching total sessions:", err);
+    res.status(500).json({ message: "Server error while fetching total sessions." });
   }
 };
 
-exports.updateWorkingDays = async (req, res) => {
+exports.updateTotalSessions = async (req, res) => {
   try {
     const { semester } = req.params;
-    const { totalWorkingDays } = req.body;
+    const { totalSessions } = req.body;
 
     const record = await WorkingDays.findOneAndUpdate(
       { semester },
-      { totalWorkingDays },
+      { totalSessions },
       { new: true }
     );
 
-    if (!record)
+    if (!record) {
       return res.status(404).json({ message: "Semester not found." });
+    }
 
     res.status(200).json({
-      message: "Working days updated successfully.",
+      message: "Total sessions updated successfully.",
       data: record,
     });
-
   } catch (err) {
-    console.error("Error updating working days:", err);
-    res.status(500).json({ message: "Server error while updating working days." });
+    console.error("Error updating total sessions:", err);
+    res.status(500).json({ message: "Server error while updating total sessions." });
   }
 };
+
 
 exports.getAllClasses = async (req, res) => {
   try {
@@ -374,28 +386,32 @@ exports.getMonthlyReport = async (req, res) => {
     const { className, month, year } = req.params;
 
     const startDate = new Date(year, month - 1, 1);
-    const endDate = new Date(year, month, 0);
+    const endDate = new Date(year, month, 0, 23, 59, 59, 999);
+
+    const timetables = await Timetable.find({ class: className }).select("_id subject");
+    if (!timetables.length) {
+      return res.json({ message: "No timetables found for this class." });
+    }
+
+    const timetableMap = {};
+    timetables.forEach(t => (timetableMap[t._id.toString()] = t.subject));
 
     const attendanceRecords = await Attendance.find({
+      timetable: { $in: timetables.map(t => t._id) },
       date: { $gte: startDate, $lte: endDate },
     })
       .populate("studentId", "name class role")
-      .populate("teacherAssignment", "subject")
       .lean();
 
-    const filtered = attendanceRecords.filter(
-      (r) => r.studentId?.class === className
-    );
-
-    if (!filtered.length) {
+    if (!attendanceRecords.length) {
       return res.json({ message: "No attendance data found for this class in the selected month." });
     }
 
     const studentReports = {};
 
-    filtered.forEach((rec) => {
+    attendanceRecords.forEach((rec) => {
       const studentName = rec.studentId?.name || "Unknown";
-      const subject = rec.teacherAssignment?.subject || "Unknown";
+      const subject = timetableMap[rec.timetable?.toString()] || "Unknown";
 
       if (!studentReports[studentName]) studentReports[studentName] = {};
       if (!studentReports[studentName][subject])
@@ -414,7 +430,7 @@ exports.getMonthlyReport = async (req, res) => {
           subject,
           presentDays: data.present,
           totalDays: data.total,
-          percentage
+          percentage,
         });
       }
     }
@@ -431,15 +447,16 @@ exports.getSemesterReport = async (req, res) => {
     let { className, semester } = req.params;
     if (!semester.startsWith("Sem")) semester = `Sem${semester}`;
 
-    const assignments = await TeacherAssignment.find({ class: className, semester })
-      .select("_id subject");
-
-    if (!assignments.length) {
+    const timetables = await Timetable.find({ class: className, semester }).select("_id subject");
+    if (!timetables.length) {
       return res.json({ message: "No subjects found for this class and semester." });
     }
 
+    const timetableMap = {};
+    timetables.forEach(t => (timetableMap[t._id.toString()] = t.subject));
+
     const attendanceRecords = await Attendance.find({
-      teacherAssignment: { $in: assignments.map((a) => a._id) },
+      timetable: { $in: timetables.map(t => t._id) },
     })
       .populate("studentId", "name class role")
       .lean();
@@ -448,14 +465,11 @@ exports.getSemesterReport = async (req, res) => {
       return res.json({ message: "No attendance data found for this semester." });
     }
 
-    const subjectMap = {};
-    assignments.forEach((a) => (subjectMap[a._id.toString()] = a.subject));
-
     const studentReports = {};
 
     attendanceRecords.forEach((rec) => {
       const studentName = rec.studentId?.name || "Unknown";
-      const subject = subjectMap[rec.teacherAssignment?.toString()] || "Unknown";
+      const subject = timetableMap[rec.timetable?.toString()] || "Unknown";
 
       if (!studentReports[studentName]) studentReports[studentName] = {};
       if (!studentReports[studentName][subject])
@@ -474,17 +488,38 @@ exports.getSemesterReport = async (req, res) => {
           subject,
           presentDays: data.present,
           totalDays: data.total,
-          percentage
+          percentage,
         });
       }
     }
 
-    res.json({ className, semester, report });
+    const consolidatedReport = Object.values(
+      report.reduce((acc, row) => {
+        const key = row.studentName;
+        if (!acc[key]) {
+          acc[key] = { studentName: row.studentName, presentDays: 0, totalDays: 0 };
+        }
+        acc[key].presentDays += row.presentDays;
+        acc[key].totalDays += row.totalDays;
+        return acc;
+      }, {})
+    ).map((r) => ({
+      ...r,
+      percentage: r.totalDays ? Math.round((r.presentDays / r.totalDays) * 100) : 0,
+    }));
+
+    res.json({
+      className,
+      semester,
+      report: consolidatedReport,
+
+    });
   } catch (err) {
     console.error("Error generating semester report:", err);
     res.status(500).json({ message: "Server error generating semester report." });
   }
 };
+
 
 exports.addTimetableEntry = async (req, res) => {
   try {

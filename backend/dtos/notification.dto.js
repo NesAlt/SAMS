@@ -14,7 +14,7 @@ const NotificationSchema = Joi.object({
 
   message: Joi.string().trim().required(),
 
-  date: Joi.date().required(),
+  date: Joi.date().default(() => new Date(), 'current date'),
 
   type: Joi.string()
     .valid('leave', 'reminder', 'announcement', 'warning')

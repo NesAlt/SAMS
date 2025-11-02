@@ -21,6 +21,7 @@ app.use('/api/auth', require('./routes/Auth.route'));
 app.use('/api/adminUser',require('./routes/AdminUsers.route'));
 app.use('/api/teacherUser',require('./routes/TeacherUser.route'));
 app.use('/api/studentUser',require('./routes/StudentUser.route'));
+app.use('/api/notifications', require('./routes/Notifications.route'));
 
 const PORT =process.env.PORT
 connectDB().then(()=>{

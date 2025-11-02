@@ -3,7 +3,8 @@ import DashboardLayout from "../../components/DashboardLayout";
 import AdminUserManagement from "./AdminUserManagement";
 import AdminEventManager from './AdminEventManager';
 import AdminTimetableManager from './AdminTimeTableManager';
-import AdminSystem from './AdminSystem';
+// import AdminSystem from './AdminSystem';
+import AdminNotificationManager from './AdminNotificationManager';
 import AdminReportGen from './AdminReportGen';
 import { useState } from "react";
 
@@ -15,7 +16,8 @@ const AdminDashboard = () => {
     "Event Manager",
     "Timetable Manager",
     "Generate Reports",
-    "System Settings",
+    "Notification Manager"
+    // "System Settings",
   ];
 
   const [activeSection,setActiveSection]=useState("Dashboard Overview");
@@ -44,9 +46,11 @@ const AdminDashboard = () => {
 
       case "Generate Reports":
         return <AdminReportGen/>
-        
-      case "System Settings":
-        return <AdminSystem/>
+      
+      case "Notification Manager":
+        return <AdminNotificationManager/>
+      // case "System Settings":
+      //   return <AdminSystem/>
 
       default:
         return null;
