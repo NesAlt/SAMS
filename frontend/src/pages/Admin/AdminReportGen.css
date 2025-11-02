@@ -1,4 +1,3 @@
-/* Admin Reports Container */
 .admin-reports {
   padding: 24px;
   background-color: #f5f6fa;
@@ -6,14 +5,12 @@
   font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
 }
 
-/* Page Heading */
 .admin-reports h2 {
   font-size: 1.8rem;
   margin-bottom: 20px;
   color: #2f3640;
 }
 
-/* Class Selection */
 .class-selection {
   margin-bottom: 24px;
 }
@@ -54,7 +51,6 @@
   border-color: #800020;
 }
 
-/* Report Options */
 .report-options {
   margin-bottom: 24px;
 }
@@ -96,7 +92,6 @@
   cursor: not-allowed;
 }
 
-/* Report Table */
 .report-table {
   margin-top: 20px;
   overflow-x: auto;
@@ -146,14 +141,12 @@
   background-color: #1e90a0;
 }
 
-/* No Data Message */
 .no-data {
   margin-top: 20px;
   font-style: italic;
   color: #555;
 }
 
-/* Responsive */
 @media (max-width: 768px) {
   .class-selection ul {
     flex-direction: column;

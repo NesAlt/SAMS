@@ -1,4 +1,3 @@
-/* Modal Overlay */
 .modal-overlay {
   position: fixed;
   top: 0;
@@ -12,7 +11,6 @@
   z-index: 1000;
 }
 
-/* Modal Container */
 .modal {
   background-color: #fff;
   padding: 2rem;
@@ -23,7 +21,6 @@
   animation: fadeIn 0.3s ease-out;
 }
 
-/* Heading */
 .modal h3 {
   margin-top: 0;
   font-size: 1.5rem;
@@ -32,7 +29,6 @@
   text-align: center;
 }
 
-/* Form Elements */
 .modal form {
   display: flex;
   flex-direction: column;
@@ -61,7 +57,6 @@
   box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.2);
 }
 
-/* Buttons */
 .modal-buttons {
   display: flex;
   justify-content: flex-end;
@@ -96,7 +91,6 @@
   background-color: #999;
 }
 
-/* Fade-in animation */
 @keyframes fadeIn {
   from {
     opacity: 0;
@@ -108,7 +102,6 @@
   }
 }
 
-/* Responsive */
 @media (max-width: 480px) {
   .modal {
     width: 95%;

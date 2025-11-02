@@ -78,7 +78,6 @@ const AdminReports = () => {
         `${r.percentage || 0}%`,
       ]);
     } else {
-      // semester (consolidated)
       tableColumn = ["Student Name", "Present Days", "Total Days", "Percentage"];
       tableRows = reportData.map((r) => [
         r.studentName || "N/A",

@@ -1,9 +1,3 @@
-/* TeacherAttendance.css
-   Put this in the same path as your import:
-   import "./TeacherAttendance.css";
-*/
-
-/* --- Container / Typography --- */
 .mark-attendance-container {
   max-width: 1100px;
   margin: 24px auto;
@@ -21,7 +15,6 @@
   margin-bottom: 16px;
 }
 
-/* --- Semester selector --- */
 .semester-select {
   display: flex;
   justify-content: center;
@@ -45,7 +38,6 @@
 }
 .semester-select select:focus { border-color: #3b82f6; box-shadow: 0 4px 12px rgba(59,130,246,0.08); }
 
-/* --- Upcoming classes grid --- */
 .upcoming-classes {
   margin-top: 6px;
 }
@@ -111,7 +103,6 @@
 .class-card h4 { margin: 0 0 6px 0; color: #0f4c81; font-weight: 700; font-size: 1rem; }
 .class-card p { margin: 0; font-size: 0. nine rem; color: #475569; }
 
-/* --- Attendance panel --- */
 .attendance-section {
   margin-top: 20px;
   padding: 18px;
@@ -127,7 +118,6 @@
   font-weight: 700;
 }
 
-/* --- Controls --- */
 .control-buttons {
   display: flex;
   flex-wrap: wrap;
@@ -163,7 +153,6 @@
   background: #fbfdff;
 }
 
-/* --- Student grid --- */
 .student-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
@@ -187,7 +176,6 @@
 .student-card.present { background: #e6ffef; border-color: #10b981; }
 .student-card.absent  { background: #fff1f2; border-color: #ef4444; }
 
-/* --- Submit button --- */
 .submit-area {
   display:flex;
   justify-content:center;
@@ -204,7 +192,6 @@
 }
 .submit-btn:disabled { opacity: 0.55; cursor: not-allowed; }
 
-/* --- Responsive tweaks --- */
 @media (max-width: 720px) {
   .class-grid { grid-template-columns: repeat(1, 1fr); }
   .student-grid { grid-template-columns: repeat(2, 1fr); }

@@ -182,7 +182,7 @@ exports.getClassesBySemester = async (req, res) => {
 exports.getAttendanceSummary = async (req, res) => {
   try {
     const { className } = req.params;
-    const { filter } = req.query; // "month" or "semester"
+    const { filter } = req.query; 
     const teacherId = req.user.id;
 
     const timetable = await Timetable.findOne({ teacher: teacherId, class: className });
@@ -382,7 +382,6 @@ exports.getUpcomingClasses = async (req, res) => {
 
     const upcomingClasses = [];
 
-    // Loop next 7 days
     for (let i = 0; i < 7; i++) {
       const current = new Date(today);
       current.setDate(today.getDate() + i);
@@ -405,7 +404,7 @@ exports.getUpcomingClasses = async (req, res) => {
           return {
             ...tt.toObject(),
             date: new Date(current),
-            isMarked: !!alreadyMarked, // ✅ add this flag
+            isMarked: !!alreadyMarked,
           };
         })
       );
@@ -451,7 +450,7 @@ exports.getClassLeaves = async (req, res) => {
 exports.updateLeaveStatus = async (req, res) => {
   try {
     const { id } = req.params;
-    const { status } = req.body; // "approved", "denied", "duty_leave"
+    const { status } = req.body;
 
     if (!["approved", "denied", "duty_leave"].includes(status)) {
       return res.status(400).json({ message: "Invalid status value." });

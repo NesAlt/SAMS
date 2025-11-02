@@ -43,7 +43,6 @@ body {
   background-color: #c00030;
 }
 
-/* Main Content */
 .main-content {
   flex: 1;
   display: flex;
@@ -51,7 +50,6 @@ body {
   background-color: #f5f6fa;
 }
 
-/* Header */
 .header {
   display: flex;
   justify-content: space-between;
@@ -69,19 +67,16 @@ body {
   cursor: pointer;
 }
 
-/* Header Actions */
 .header-actions {
   display: flex;
   align-items: center;
   gap: 20px;
 }
 
-/* Dropdown Containers */
 .dropdown-container {
   position: relative;
 }
 
-/* Dropdown Menus */
 .dropdown-content {
   position: absolute;
   right: 0;
@@ -114,7 +109,6 @@ body {
 .dropdown-content p:hover {
   background-color: #454545a0;
 }
-/* Notifications Dropdown */
 .notifications-dropdown {
   max-height: 350px;
   overflow-y: auto;
@@ -127,7 +121,6 @@ body {
   color: #f0f0f0;
 }
 
-/* Individual Notification Item */
 .notification-item {
   display: flex;
   flex-direction: column;
@@ -166,7 +159,6 @@ body {
   font-size: 0.8rem;
 }
 
-/* Scrollbar Styling for Modern Look */
 .notifications-dropdown::-webkit-scrollbar {
   width: 6px;
 }
@@ -185,14 +177,12 @@ body {
   background-color: #888;
 }
 
-/* Page Content */
 .page-content {
   flex: 1;
   padding: 24px;
   overflow-y: auto;
 }
 
-/* Animations */
 @keyframes fadeIn {
   from {
     opacity: 0;

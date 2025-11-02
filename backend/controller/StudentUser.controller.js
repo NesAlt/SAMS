@@ -22,7 +22,6 @@ exports.getMyAttendance = async (req, res) => {
       return res.status(404).json({ message: "No attendance records found." });
     }
 
-    // Filter by subject if provided
     let filteredRecords = attendanceRecords;
     if (subjectFilter) {
       filteredRecords = attendanceRecords.filter(
@@ -34,14 +33,12 @@ exports.getMyAttendance = async (req, res) => {
       return res.status(404).json({ message: "No attendance found for this subject." });
     }
 
-    // --- DAILY ATTENDANCE ---
     const daily = filteredRecords.map((record) => ({
       date: record.date,
       class: record.timetable.class,
       status: record.status,
     }));
 
-    // --- MONTHLY ATTENDANCE ---
     const monthlyMap = {};
     filteredRecords.forEach((record) => {
       const monthKey = new Date(record.date).toLocaleString("default", {
@@ -57,7 +54,6 @@ exports.getMyAttendance = async (req, res) => {
       percentage: ((data.present / data.total) * 100).toFixed(2),
     }));
 
-    // --- SEMESTER ATTENDANCE ---
     const semester = filteredRecords[0].timetable.semester;
     const totalClasses = filteredRecords.length;
     const totalPresent = filteredRecords.filter((r) => r.status === "present").length;
@@ -65,7 +61,6 @@ exports.getMyAttendance = async (req, res) => {
     const requiredPercentage = 75;
     const status = overallPercentage >= requiredPercentage ? "Above Required" : "Below Required";
 
-    // --- RESPONSE ---
     res.json({
       subject: subjectFilter || "All Subjects",
       semester,
@@ -165,7 +160,7 @@ exports.getMyLeaves = async (req, res) => {
     const studentId = req.user._id;
 
     const leaves = await Leave.find({ studentId })
-      .populate('reviewedBy', 'name role') // show teacher name if reviewed
+      .populate('reviewedBy', 'name role')
       .sort({ appliedAt: -1 });
 
     res.status(200).json(leaves);

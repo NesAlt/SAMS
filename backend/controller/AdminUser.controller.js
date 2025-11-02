@@ -299,7 +299,6 @@ exports.setTotalSessions = async (req, res) => {
       return res.status(400).json({ message: "Working days for this semester already set." });
     }
 
-    // 🔹 Calculate total sessions from timetable data
     const timetables = await Timetable.find({ semester });
     if (!timetables.length) {
       return res.status(404).json({
@@ -307,12 +306,10 @@ exports.setTotalSessions = async (req, res) => {
       });
     }
 
-    // Count total unique (subject, dayOfWeek, time slot) combinations
-    const sessionsPerWeek = timetables.length; // each record = 1 hour session
-    const totalWeeks = Math.ceil(totalWorkingDays / 5); // assuming 5-day week
+    const sessionsPerWeek = timetables.length;
+    const totalWeeks = Math.ceil(totalWorkingDays / 5);
     const totalSessions = sessionsPerWeek * totalWeeks;
 
-    // 🔹 Create record
     const record = new WorkingDays({
       semester,
       totalWorkingDays,
@@ -519,7 +516,6 @@ exports.getSemesterReport = async (req, res) => {
     res.status(500).json({ message: "Server error generating semester report." });
   }
 };
-
 
 exports.addTimetableEntry = async (req, res) => {
   try {

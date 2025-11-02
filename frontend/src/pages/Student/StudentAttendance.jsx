@@ -8,7 +8,6 @@ const StudentAttendance = () => {
   const [attendance, setAttendance] = useState(null);
   const [loading, setLoading] = useState(false);
 
-  // Fetch all subjects for the student
   useEffect(() => {
     const fetchSubjects = async () => {
       try {
@@ -21,7 +20,6 @@ const StudentAttendance = () => {
     fetchSubjects();
   }, []);
 
-  // Fetch attendance data for the selected subject
   useEffect(() => {
     if (!selectedSubject) return;
 

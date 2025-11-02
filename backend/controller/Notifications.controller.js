@@ -67,7 +67,6 @@ exports.createNotification = async (req, res) => {
   }
 };
 
-
 exports.getMyNotifications = async (req, res) => {
   try {
     const { id, role } = req.user;
@@ -86,7 +85,6 @@ exports.getMyNotifications = async (req, res) => {
     res.status(500).json({ message: "Server error fetching notifications." });
   }
 };
-
 
 exports.markAsRead = async (req, res) => {
   try {

@@ -33,7 +33,6 @@ const WorkingDaysModal = ({ isOpen, onClose, mode, initialData, onSubmit }) => {
 
     const formattedSemester = `Sem${numericSemester}`;
 
-    // 👇 Only send totalWorkingDays — backend will compute totalSessions automatically
     onSubmit({ semester: formattedSemester, totalWorkingDays: Number(totalWorkingDays) });
   };
 
