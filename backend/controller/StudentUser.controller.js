@@ -3,7 +3,7 @@ const Attendance = require("../models/Attendance");
 const User = require("../models/User");
 const Leave =require("../models/Leave")
 const Event = require('../models/Event');
-const TeacherAssignment = require('../models/TeacherAssignment');
+// const TeacherAssignment = require('../models/TeacherAssignment');
 const WorkingDays = require("../models/WorkingDays");
 
 exports.getMyAttendance = async (req, res) => {
@@ -17,8 +17,8 @@ exports.getMyAttendance = async (req, res) => {
 
     const attendanceRecords = await Attendance.find({ studentId })
       .populate({
-        path: 'teacherAssignment',
-        select: 'semester class subject'
+        path: "timetable",
+        select: "semester class subject",
       })
       .lean();
 
@@ -34,9 +34,9 @@ exports.getMyAttendance = async (req, res) => {
       });
     }
 
-    const semester = attendanceRecords[0]?.teacherAssignment?.semester;
+    const semester = attendanceRecords[0]?.timetable?.semester;
     if (!semester) {
-      return res.status(400).json({ message: "Semester information missing in records." });
+      return res.status(400).json({ message: "Semester info missing in records." });
     }
 
     const workingDays = await WorkingDays.findOne({ semester });
@@ -47,20 +47,19 @@ exports.getMyAttendance = async (req, res) => {
       });
     }
 
-    const presentCount = attendanceRecords.filter(a => a.status === "present").length;
     const totalWorkingDays = workingDays.totalWorkingDays || 0;
+    const presentCount = attendanceRecords.filter(a => a.status === "present").length;
 
-    const overallPercentage = totalWorkingDays > 0
-      ? Math.round((presentCount / totalWorkingDays) * 100)
-      : 0;
+    const overallPercentage =
+      totalWorkingDays > 0 ? Math.round((presentCount / totalWorkingDays) * 100) : 0;
 
     const requiredPercentage = 75;
     const status = overallPercentage >= requiredPercentage ? "Above Required" : "Behind";
 
     const daily = attendanceRecords.map(a => ({
       date: a.date,
-      class: a.teacherAssignment.class,
-      subject: a.teacherAssignment.subject,
+      class: a.timetable.class,
+      subject: a.timetable.subject,
       status: a.status,
     }));
 
@@ -95,7 +94,9 @@ exports.getMyAttendance = async (req, res) => {
 
   } catch (err) {
     console.error("Error fetching student attendance:", err);
-    res.status(500).json({ error:err.message || "Server error while fetching attendance" });
+    res.status(500).json({
+      error: err.message || "Server error while fetching attendance",
+    });
   }
 };
 
