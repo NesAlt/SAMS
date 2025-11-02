@@ -144,10 +144,10 @@ exports.getAttendanceStatus = async (req, res) => {
       date: { $gte: startOfDay, $lte: endOfDay },
     });
 
-    console.log(
-      `Checked attendance for timetable ${timetableId}:`,
-      attendance ? "found" : "not found"
-    );
+    // console.log(
+    //   `Checked attendance for timetable ${timetableId}:`,
+    //   attendance ? "found" : "not found"
+    // );
 
     res.json({ marked: !!attendance });
   } catch (err) {
@@ -233,40 +233,54 @@ exports.getAttendanceSummary = async (req, res) => {
 exports.getStudentsWithAttendance = async (req, res) => {
   try {
     const { className } = req.params;
-    const { timetableId } = req.query;
+    const { timetableId, filter, month } = req.query;
     const teacherId = req.user.id;
 
-    if (!timetableId) {
-      return res.status(400).json({ message: "timetableId is required" });
-    }
-
-    const timetable = await Timetable.findOne({ _id: timetableId, teacher: teacherId });
-    if (!timetable) {
+    const baseTimetable = await Timetable.findOne({ _id: timetableId, teacher: teacherId });
+    if (!baseTimetable) {
       return res.status(404).json({ message: "No timetable entry found" });
     }
 
+    const classTimetables = await Timetable.find({
+      teacher: teacherId,
+      class: className,
+    }).select("_id");
+
+    const timetableIds = classTimetables.map(t => t._id);
+
     const students = await User.find({ class: className, role: "student" });
 
-    const today = new Date();
-    const startOfDay = new Date(today.setHours(0, 0, 0, 0));
-    const endOfDay = new Date(today.setHours(23, 59, 59, 999));
+    let dateFilter = {};
+    const now = new Date();
 
-    const existingAttendance = await Attendance.find({
-      timetable: timetableId,
-      date: { $gte: startOfDay, $lte: endOfDay },
+    if (filter === "month" && month) {
+      const monthIndex = isNaN(month)
+        ? new Date(`${month} 1, ${now.getFullYear()}`).getMonth()
+        : parseInt(month, 10) - 1;
+
+      const startOfMonth = new Date(now.getFullYear(), monthIndex, 1, 0, 0, 0, 0);
+      const endOfMonth = new Date(now.getFullYear(), monthIndex + 1, 0, 23, 59, 59, 999);
+      dateFilter = { date: { $gte: startOfMonth, $lte: endOfMonth } };
+    }
+
+    const allAttendance = await Attendance.find({
+      timetable: { $in: timetableIds },
+      ...(filter === "month" && month ? dateFilter : {}),
     });
 
-    const semester = timetable.semester;
-    const workingDays = await WorkingDays.findOne({ semester });
-    const totalWorkingDays = workingDays?.totalWorkingDays || 0;
+    const sessionKeys = [
+      ...new Set(allAttendance.map(a => `${a.timetable}_${a.date.toISOString().split("T")[0]}`)),
+    ];
+    const totalSessions = sessionKeys.length;
 
     const studentData = await Promise.all(
       students.map(async (student) => {
-        const presentCount = await Attendance.countDocuments({
-          studentId: student._id,
-          timetable: timetable._id,
-          status: "present",
-        });
+        const presentCount = allAttendance.filter(
+          (a) =>
+            a.studentId.toString() === student._id.toString() &&
+            a.status === "present"
+        ).length;
+
         const approvedLeaveCount = await Leave.countDocuments({
           studentId: student._id,
           status: "approved",
@@ -274,13 +288,9 @@ exports.getStudentsWithAttendance = async (req, res) => {
 
         const effectivePresent = presentCount + approvedLeaveCount;
         const percentage =
-          totalWorkingDays > 0
-            ? Math.round((effectivePresent / totalWorkingDays) * 100)
+          totalSessions > 0
+            ? Math.round((effectivePresent / totalSessions) * 100)
             : 0;
-
-        const existing = existingAttendance.find(
-          (att) => att.studentId.toString() === student._id.toString()
-        );
 
         return {
           _id: student._id,
@@ -288,23 +298,24 @@ exports.getStudentsWithAttendance = async (req, res) => {
           email: student.email,
           rollNo: student.rollNo,
           attendancePercentage: percentage,
-          existingStatus: existing ? existing.status : null,
         };
       })
     );
 
     res.json({
       className,
-      semester,
-      totalWorkingDays,
+      semester: baseTimetable.semester,
+      totalSessions,
+      filterType: filter || "semester",
+      selectedMonth: month || null,
       students: studentData,
-      alreadyMarked: existingAttendance.length > 0,
     });
   } catch (err) {
     console.error("Error fetching students with attendance:", err);
     res.status(500).json({ message: "Server error" });
   }
 };
+
 
 exports.getUpcomingClasses = async (req, res) => {
   try {

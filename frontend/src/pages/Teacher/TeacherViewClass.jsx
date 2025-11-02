@@ -11,6 +11,8 @@ const TeacherClass = () => {
   const [selectedClass, setSelectedClass] = useState(null);
   const [students, setStudents] = useState([]);
   const [attendanceFilter, setAttendanceFilter] = useState("semester");
+  const [selectedTimetableId, setSelectedTimetableId] = useState(null);
+  const [selectedMonth, setSelectedMonth] = useState("");
 
   useEffect(() => {
     const fetchTimetables = async () => {
@@ -36,10 +38,18 @@ const TeacherClass = () => {
     }
   }, [selectedSemester, timetables]);
 
-  const fetchStudents = async (className,timetableId) => {
+  const fetchStudents = async (className, timetableId) => {
     try {
+      const params = new URLSearchParams({
+        timetableId,
+        filter: attendanceFilter,
+      });
+      if (attendanceFilter === "month" && selectedMonth) {
+        params.append("month", selectedMonth);
+      }
+
       const { data } = await axios.get(
-        `/teacherUser/class/${className}/students?timetableId=${timetableId}filter=${attendanceFilter}`
+        `/teacherUser/class/${className}/students?${params.toString()}`
       );
       setStudents(data.students || []);
       setSelectedClass(className);
@@ -105,18 +115,21 @@ const TeacherClass = () => {
 
       {selectedSemester && filteredTimetables.length > 0 ? (
         <div className="assignment-list">
-        {[...new Map(
-          filteredTimetables.map((t) => [`${t.class}-${t.subject}`, t])
-        ).values()].map((t) => (
-          <div
-            key={`${t.class}-${t.subject}`}
-            className="assignment-card"
-            onClick={() => fetchStudents(t.class,t._id)}
-          >
-            <h4>{t.class}</h4>
-            <p>{t.subject}</p>
-          </div>
-        ))}
+          {[...new Map(
+            filteredTimetables.map((t) => [`${t.class}-${t.subject}`, t])
+          ).values()].map((t) => (
+            <div
+              key={`${t.class}-${t.subject}`}
+              className="assignment-card"
+              onClick={() => {
+                fetchStudents(t.class, t._id);
+                setSelectedTimetableId(t._id);
+              }}
+            >
+              <h4>{t.class}</h4>
+              <p>{t.subject}</p>
+            </div>
+          ))}
         </div>
       ) : (
         selectedSemester && <p>No classes found for this semester.</p>
@@ -131,21 +144,54 @@ const TeacherClass = () => {
               <label>Filter by: </label>
               <select
                 value={attendanceFilter}
-                  onChange={(e) => {
-                    setAttendanceFilter(e.target.value);
-                    if (selectedClass) {
-                      const selectedTimetable = filteredTimetables.find(
-                        (t) => t.class === selectedClass
-                      );
-                      if (selectedTimetable) {
-                        fetchStudents(selectedClass, selectedTimetable._id);
-                      }
-                    }
-                  }}  
+                onChange={(e) => {
+                  setAttendanceFilter(e.target.value);
+                  setSelectedMonth("");
+                }}
               >
                 <option value="semester">Semester</option>
                 <option value="month">Month</option>
               </select>
+
+              {attendanceFilter === "month" && (
+                <select
+                  value={selectedMonth}
+                  onChange={(e) => setSelectedMonth(e.target.value)}
+                >
+                  <option value="">-- Select Month --</option>
+                  {[
+                    "January",
+                    "February",
+                    "March",
+                    "April",
+                    "May",
+                    "June",
+                    "July",
+                    "August",
+                    "September",
+                    "October",
+                    "November",
+                    "December",
+                  ].map((m,idx) => (
+                    <option key={m} value={idx + 1}>
+                      {m}
+                    </option>
+                  ))}
+                </select>
+              )}
+
+              <button
+                className="refresh-btn"
+                onClick={() => {
+                  if (selectedClass && selectedTimetableId) {
+                    fetchStudents(selectedClass, selectedTimetableId);
+                  } else {
+                    console.warn("No class or timetable selected");
+                  }
+                }}
+              >
+                Refresh
+              </button>
               <button className="download-btn" onClick={downloadPDF}>
                 Download Report
               </button>
